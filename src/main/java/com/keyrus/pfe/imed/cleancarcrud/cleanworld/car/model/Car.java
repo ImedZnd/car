@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -101,7 +102,7 @@ public final class Car {
         return
                 checkStringOrError(
                         type,
-                        () -> new CarError.TypeError("type must be not empty")
+                        CarError.TypeError::new
                 );
     }
 
@@ -109,7 +110,7 @@ public final class Car {
         return
                 checkStringOrError(
                         platNumber,
-                        () -> new CarError.PlateNumberError("plate number must be not empty")
+                        CarError.PlateNumberError::new
                 );
     }
 
@@ -138,12 +139,21 @@ public final class Car {
         String message();
 
         record PlateNumberError(String message) implements CarError {
+            public PlateNumberError() {
+                this("");
+            }
         }
 
         record TypeError(String message) implements CarError {
+            public TypeError() {
+                this("");
+            }
         }
 
         record ReleaseDateError(String message) implements CarError {
+            public ReleaseDateError() {
+                this("");
+            }
         }
     }
 }

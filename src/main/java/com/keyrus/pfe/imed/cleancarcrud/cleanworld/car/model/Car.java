@@ -70,9 +70,31 @@ public final class Car {
 
     private static Optional<? extends CarError> checkReleaseDate(final LocalDate releaseDate) {
         return
-                releaseDate.isAfter(LocalDate.now())
-                        ? Optional.of(new CarError.ReleaseDateError("release date can't be in the future"))
-                        : Optional.empty();
+                checkDateOrError(
+                        releaseDate,
+                        CarError.ReleaseDateError::new
+                );
+    }
+
+
+    private static Optional<? extends CarError> checkDateOrError(
+            final LocalDate localDate,
+            final Supplier<? extends CarError> errorSupplier) {
+        return
+                checkDate(localDate)
+                        ? Optional.empty()
+                        : Optional.of(errorSupplier.get());
+    }
+
+    private static boolean checkDate(final LocalDate localDate) {
+        return
+                Objects.nonNull(localDate) &&
+                        checkDateAfterNow(localDate);
+    }
+
+    private static boolean checkDateAfterNow(LocalDate localDate) {
+        return
+                !localDate.isAfter(LocalDate.now());
     }
 
     private static Optional<? extends CarError> checkType(final String type) {
@@ -102,6 +124,12 @@ public final class Car {
     }
 
     private static boolean checkString(String string) {
+        return
+                Objects.nonNull(string) &&
+                        checkEmpty(string);
+    }
+
+    private static boolean checkEmpty(String string) {
         return !string.isEmpty();
     }
 

@@ -112,4 +112,26 @@ class CarTest {
                 () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.ReleaseDateError))
         );
     }
+
+    @Test
+    @DisplayName("car have all parameters null")
+    void car_have_all_parameters_null() {
+        final String platNumber = null;
+        final String type = null;
+        final LocalDate releaseDate = null;
+        final var result =
+                Car.of(
+                                platNumber,
+                                type,
+                                releaseDate
+                        )
+                        .getLeft();
+
+        assertAll(
+                () -> assertEquals(3, result.size()),
+                () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.PlateNumberError)),
+                () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.TypeError)),
+                () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.ReleaseDateError))
+        );
+    }
 }

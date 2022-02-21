@@ -36,7 +36,13 @@ public interface CarRepository {
 
         record CarWithPlateNumberNotExistError(String message) implements RepositoryCarError {
             public CarWithPlateNumberNotExistError() {
-                this("");}
+                this("");
+            }
+        }
+        record NullParameterError(String message) implements RepositoryCarError {
+            public NullParameterError() {
+                this("");
+            }
         }
     }
 

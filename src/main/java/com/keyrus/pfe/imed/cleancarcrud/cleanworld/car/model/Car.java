@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 @Data
 public final class Car {
+
     private final String platNumber;
     private final String type;
     private final LocalDate releaseDate;

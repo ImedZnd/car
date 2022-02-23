@@ -24,6 +24,8 @@ public interface CarRepository {
 
     Optional<Car> deleteCar(String plateNumber);
 
+    Collection<Car> deleteAll();
+
     sealed interface RepositoryCarError {
 
         String message();

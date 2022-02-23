@@ -4,15 +4,21 @@ import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
 import io.vavr.control.Either;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
 public final class InMemoryCarRepository implements CarRepository {
 
-    private final Collection<Car> cars = new ArrayList<>();
+    private static final InMemoryCarRepository instance = new InMemoryCarRepository();
+
+    public static InMemoryCarRepository getInstance(){
+        return instance;
+    }
+
+    private InMemoryCarRepository(){
+    }
+
+    private final Collection<Car> cars = new HashSet<>();
 
     @Override
     public Collection<Car> findAllCars() {
@@ -38,27 +44,66 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> saveCar(Car car) {
-        return null;
+        if (Objects.isNull(car))
+            return Either.left(new RepositoryCarError.NullParameterError());
+        else if (carExist(car.getPlatNumber()))
+            return Either.left(new RepositoryCarError.CarWithPlateNumberAlreadyExistError());
+        else {
+            cars.add(car);
+            return Either.right(car);
+        }
     }
 
     @Override
     public Either<? extends RepositoryCarError, Car> updateCar(Car car) {
-        return null;
+        if (Objects.isNull(car))
+            return Either.left(new RepositoryCarError.NullParameterError());
+        else if (carExist(car.getPlatNumber())) {
+            final var removedCar = findCarByPlateNumber(car.getPlatNumber()).get();
+            cars.remove(removedCar);
+            cars.add(car);
+            return Either.right(car);
+        } else {
+            return Either.left(new RepositoryCarError.CarWithPlateNumberNotExistError());
+        }
     }
 
     @Override
     public Optional<Car> deleteCar(Car car) {
-        return Optional.empty();
+        if (Objects.isNull(car))
+            return Optional.empty();
+        return deleteCar(car.getPlatNumber());
     }
 
     @Override
     public Optional<Car> deleteCar(String plateNumber) {
-        return Optional.empty();
+        if (Objects.isNull(plateNumber))
+            return Optional.empty();
+        else if (carExist(plateNumber)) {
+            final var removedCar = findCarByPlateNumber(plateNumber).get();
+            cars.remove(removedCar);
+            return Optional.of(removedCar);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Collection<Car> deleteAll() {
+        final var carsToReturn = findAllCars();
+        cars.clear();
+        return carsToReturn;
     }
 
     private Collection<Car> findAllCarsByCriteria(final Predicate<Car> criteria) {
         return cars.stream()
                 .filter(criteria)
                 .toList();
+    }
+
+    private boolean carExist(String plateNumber) {
+        return cars.stream()
+                .map(Car::getPlatNumber)
+                .anyMatch(plateNumber::equals);
     }
 }

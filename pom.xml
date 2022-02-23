@@ -31,6 +31,9 @@
         <java.version>17</java.version>
         <!--helpers-->
         <vavr.version>1.0.0-alpha-4</vavr.version>
+        <!--sonarcloud-->
+        <sonar.organization>imedznd</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -64,6 +67,7 @@
             <artifactId>vavr</artifactId>
             <version>${vavr.version}</version>
         </dependency>
+
 
         <!--test-->
 

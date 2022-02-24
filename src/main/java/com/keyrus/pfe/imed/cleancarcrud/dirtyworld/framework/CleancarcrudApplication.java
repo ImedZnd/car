@@ -11,5 +11,4 @@ public class CleancarcrudApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(CleancarcrudApplication.class, args);
 	}
-
 }

@@ -1,13 +1,14 @@
 package com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Disabled
 record CarServiceTest(CarRepository carRepository) {
-
 
     @Test
     @DisplayName("car service singleton must create one instance")

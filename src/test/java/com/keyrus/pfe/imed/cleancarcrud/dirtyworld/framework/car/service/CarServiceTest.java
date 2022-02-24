@@ -1,8 +1,8 @@
-package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.repository;
+package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.service;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
-import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,22 +14,22 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @SpringBootTest
-class InMemoryCarRepositoryTest {
+class CarServiceTest {
 
-    private final InMemoryCarRepository inMemoryCarRepository;
+    final CarService carServiceInstance;
 
-    InMemoryCarRepositoryTest(@Autowired final InMemoryCarRepository inMemoryCarRepository) {
-        this.inMemoryCarRepository = inMemoryCarRepository;
+    CarServiceTest(@Autowired final CarService carServiceInstance) {
+        this.carServiceInstance = carServiceInstance;
     }
 
     @BeforeEach
     void beforeEach() {
-        inMemoryCarRepository.deleteAll();
+        carServiceInstance.deleteAllCars();
     }
 
     @AfterEach
     void afterEach() {
-        inMemoryCarRepository.deleteAll();
+        carServiceInstance.deleteAllCars();
     }
 
     @Test
@@ -37,7 +37,7 @@ class InMemoryCarRepositoryTest {
     void save_null_car_must_not_be_valid() {
         final Car car = null;
         final var result =
-                inMemoryCarRepository.saveCar(car)
+                carServiceInstance.saveCar(car)
                         .getLeft();
         Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.NullParameterError);
     }
@@ -53,11 +53,11 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         final var result =
-                inMemoryCarRepository.saveCar(car)
+                carServiceInstance.saveCar(car)
                         .get();
         final var totalCarsAfterAddingCar =
-                inMemoryCarRepository
-                        .findAllCars()
+                carServiceInstance
+                        .getAllCars()
                         .size();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(car, result),
@@ -75,9 +75,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
+        carServiceInstance.saveCar(car);
         final var result =
-                inMemoryCarRepository.saveCar(car)
+                carServiceInstance.saveCar(car)
                         .getLeft();
         Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberAlreadyExistError);
     }
@@ -99,22 +99,22 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2019, 12, 12)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car1);
+        carServiceInstance.saveCar(car1);
         final var result =
-                inMemoryCarRepository.saveCar(car2)
+                carServiceInstance.saveCar(car2)
                         .getLeft();
         Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberAlreadyExistError);
     }
 
     @Test
-    @DisplayName("findAllCars: no car will be return with no cars in repository")
+    @DisplayName("getAllCars: no car will be return with no cars in repository")
     void no_car_will_be_return_with_no_cars_in_repository() {
-        final var result = inMemoryCarRepository.findAllCars().isEmpty();
+        final var result = carServiceInstance.getAllCars().isEmpty();
         Assertions.assertTrue(result);
     }
 
     @Test
-    @DisplayName("findAllCars: only one car should return with one car saved")
+    @DisplayName("getAllCars: only one car should return with one car saved")
     void only_one_car_should_return_with_one_car_saved() {
         final var car =
                 Car.of(
@@ -123,8 +123,8 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository.findAllCars();
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance.getAllCars();
 
         Assertions.assertAll(
                 () -> Assertions.assertEquals(1, result.size()),
@@ -133,7 +133,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findAllCars: only two cars should return with only two cars saved")
+    @DisplayName("getAllCars: only two cars should return with only two cars saved")
     void only_two_cars_should_return_with_only_two_cars_saved() {
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
@@ -147,22 +147,22 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
-        final var result = inMemoryCarRepository.findAllCars().size();
+                .forEach(carServiceInstance::saveCar);
+        final var result = carServiceInstance.getAllCars().size();
         Assertions.assertEquals(size, result);
     }
 
     @Test
-    @DisplayName("findByPlateNumber: empty should return if a car with a plate number that not exist")
+    @DisplayName("getByPlateNumber: empty should return if a car with a plate number that not exist")
     void empty_should_return_if_a_car_with_a_plate_number_that_not_exist() {
         final var plateNumber = "202TN2022";
-        final var result = inMemoryCarRepository
-                .findCarByPlateNumber(plateNumber);
+        final var result = carServiceInstance
+                .getCarByPlatNumber(plateNumber);
         Assertions.assertTrue(result.isEmpty());
     }
 
     @Test
-    @DisplayName("findByPlateNumber: a single unique car should return if a single car have that plate number")
+    @DisplayName("getByPlateNumber: a single unique car should return if a single car have that plate number")
     void a_single_unique_car_should_return_if_a_single_car_have_that_plate_number() {
         final var car =
                 Car.of(
@@ -171,9 +171,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository
-                .findCarByPlateNumber(car.getPlatNumber());
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance
+                .getCarByPlatNumber(car.getPlatNumber());
         Assertions.assertAll(
                 () -> Assertions.assertTrue(result.isPresent()),
                 () -> Assertions.assertEquals(car, result.get())
@@ -181,7 +181,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByPlateNumber: a single unique car should return if multiple cars exist and a car with a plate number exist")
+    @DisplayName("getByPlateNumber: a single unique car should return if multiple cars exist and a car with a plate number exist")
     void a_single_unique_car_should_return_if_multiple_cars_exist_and_a_car_with_a_plate_number_exist() {
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
@@ -195,7 +195,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -203,9 +203,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository
-                .findCarByPlateNumber(car.getPlatNumber()).get();
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance
+                .getCarByPlatNumber(car.getPlatNumber()).get();
         Assertions.assertAll(
                 () -> Assertions.assertEquals(car, result),
                 () -> Assertions.assertTrue(result instanceof Car)
@@ -213,16 +213,16 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByType: zero size collection should return if repository dont have with received type")
+    @DisplayName("getByType: zero size collection should return if repository dont have with received type")
     void zero_size_collection_should_return_if_repository_is_empty_with_received_type() {
         final var type = "BMW";
-        final var result = inMemoryCarRepository
-                .findAllCarsByType(type);
+        final var result = carServiceInstance
+                .getAllCarsByType(type);
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    @DisplayName("findByType: one car should return if the repository have one car with the received type")
+    @DisplayName("getByType: one car should return if the repository have one car with the received type")
     void one_car_should_return_if_the_repository_have_one_car_with_the_received_type() {
         final var type = "BMW";
         final var car =
@@ -232,9 +232,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository
-                .findAllCarsByType(type);
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance
+                .getAllCarsByType(type);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(1, result.size()),
                 () -> Assertions.assertTrue(result
@@ -244,7 +244,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByType: one car should return if the repository have many cars and one car with the received type")
+    @DisplayName("getByType: one car should return if the repository have many cars and one car with the received type")
     void one_car_should_return_if_the_repository_have_many_cars_and_one_car_with_the_received_type() {
         final var type = "BMW";
         final var size = 5;
@@ -259,7 +259,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -267,9 +267,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository
-                .findAllCarsByType(type);
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance
+                .getAllCarsByType(type);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(1, result.size()),
                 () -> Assertions.assertTrue(result.stream().anyMatch(c -> c.getType().equals(type)))
@@ -277,7 +277,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByType: five cars should return if the repository have five car with the received type")
+    @DisplayName("getByType: five cars should return if the repository have five car with the received type")
     void five_cars_should_return_if_the_repository_have_five_car_with_the_received_type() {
         final var type = "BMW";
         final var size = 5;
@@ -292,9 +292,9 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
-        final var result = inMemoryCarRepository
-                .findAllCarsByType(type);
+                .forEach(carServiceInstance::saveCar);
+        final var result = carServiceInstance
+                .getAllCarsByType(type);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(size, result.size()),
                 () -> Assertions.assertTrue(result.stream().allMatch(c -> c.getType().equals(type)))
@@ -302,16 +302,16 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByReleaseYear: zero size collection should return if repository dont have received release year")
+    @DisplayName("getByReleaseYear: zero size collection should return if repository dont have received release year")
     void zero_size_collection_should_return_if_repository_is_empty_with_received_release_year() {
         final var releaseYear = 2020;
-        final var result = inMemoryCarRepository
-                .findAllCarsByReleaseYear(releaseYear);
+        final var result = carServiceInstance
+                .getAllCarsByReleaseYear(releaseYear);
         Assertions.assertEquals(0, result.size());
     }
 
     @Test
-    @DisplayName("findByReleaseYear: one car should return if the repository have many cars and one car with the received release year")
+    @DisplayName("getByReleaseYear: one car should return if the repository have many cars and one car with the received release year")
     void one_car_should_return_if_the_repository_have_many_cars_and_one_car_with_the_received_release_year() {
         final var releaseYearThisYear = 2020;
         final var size = 5;
@@ -326,7 +326,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -334,9 +334,9 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(releaseYearThisYear, 10, 10)
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository
-                .findAllCarsByReleaseYear(releaseYearThisYear);
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance
+                .getAllCarsByReleaseYear(releaseYearThisYear);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(1, result.size()),
                 () -> Assertions.assertTrue(result
@@ -354,7 +354,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByReleaseYear: five car should return if the repository only have five cars with the received release year")
+    @DisplayName("getByReleaseYear: five car should return if the repository only have five cars with the received release year")
     void five_car_should_return_if_the_repository_have_only_five_cars_with_the_received_release_year_in_find_by_release_year() {
         final var releaseYearThisYear = 2020;
         final var size = 5;
@@ -369,9 +369,9 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
-        final var result = inMemoryCarRepository
-                .findAllCarsByReleaseYear(releaseYearThisYear);
+                .forEach(carServiceInstance::saveCar);
+        final var result = carServiceInstance
+                .getAllCarsByReleaseYear(releaseYearThisYear);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(size, result.size()),
                 () -> Assertions.assertTrue(result
@@ -389,7 +389,7 @@ class InMemoryCarRepositoryTest {
     }
 
     @Test
-    @DisplayName("findByReleaseYear: five car should return if the repository have five cars with the received release year in find by release date")
+    @DisplayName("getByReleaseYear: five car should return if the repository have five cars with the received release year in find by release date")
     void five_car_should_return_if_the_repository_have_five_cars_with_the_received_release_year_in_find_by_release_year() {
         final var releaseYearThisYear = 2020;
         final var size = 5;
@@ -404,7 +404,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
                 .boxed()
@@ -416,9 +416,9 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
-        final var result = inMemoryCarRepository
-                .findAllCarsByReleaseYear(releaseYearThisYear);
+                .forEach(carServiceInstance::saveCar);
+        final var result = carServiceInstance
+                .getAllCarsByReleaseYear(releaseYearThisYear);
         Assertions.assertAll(
                 () -> Assertions.assertEquals(size, result.size()),
                 () -> Assertions.assertTrue(result
@@ -445,7 +445,7 @@ class InMemoryCarRepositoryTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        final var result = inMemoryCarRepository.updateCar(car).getLeft();
+        final var result = carServiceInstance.updateCar(car).getLeft();
         Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberNotExistError);
     }
 
@@ -453,7 +453,7 @@ class InMemoryCarRepositoryTest {
     @DisplayName("update: error should be returned if car is null in update")
     void error_should_be_returned_if_car_is_null_in_update() {
         final Car car = null;
-        final var result = inMemoryCarRepository.updateCar(car).getLeft();
+        final var result = carServiceInstance.updateCar(car).getLeft();
         Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.NullParameterError);
     }
 
@@ -467,7 +467,7 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car1);
+        carServiceInstance.saveCar(car1);
         final var car2 =
                 Car.of(
                                 "222TN2222",
@@ -475,7 +475,7 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        final var result = inMemoryCarRepository.updateCar(car2).get();
+        final var result = carServiceInstance.updateCar(car2).get();
         Assertions.assertEquals(result, car2);
     }
 
@@ -494,7 +494,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         final var car1 =
                 Car.of(
                                 "222TN2222",
@@ -502,7 +502,7 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car1);
+        carServiceInstance.saveCar(car1);
         final var car2 =
                 Car.of(
                                 "222TN2222",
@@ -510,7 +510,7 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        final var result = inMemoryCarRepository.updateCar(car2).get();
+        final var result = carServiceInstance.updateCar(car2).get();
         Assertions.assertEquals(result, car2);
     }
 
@@ -518,7 +518,7 @@ class InMemoryCarRepositoryTest {
     @DisplayName("delete: empty should be returned if car is null")
     void error_should_be_returned_if_car_is_null_in_delete_car() {
         final Car car = null;
-        final var result = inMemoryCarRepository.deleteCar(car);
+        final var result = carServiceInstance.deleteCar(car);
         Assertions.assertTrue(result.isEmpty());
     }
 
@@ -532,7 +532,7 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        final var result = inMemoryCarRepository.deleteCar(car);
+        final var result = carServiceInstance.deleteCar(car);
         Assertions.assertTrue(result.isEmpty());
     }
 
@@ -546,8 +546,8 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository.deleteCar(car);
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance.deleteCar(car);
         Assertions.assertEquals(car,result.get());
     }
 
@@ -566,7 +566,7 @@ class InMemoryCarRepositoryTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(inMemoryCarRepository::saveCar);
+                .forEach(carServiceInstance::saveCar);
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -574,8 +574,8 @@ class InMemoryCarRepositoryTest {
                                 generateRandomLocalDateMinusTenYear()
                         )
                         .get();
-        inMemoryCarRepository.saveCar(car);
-        final var result = inMemoryCarRepository.deleteCar(car);
+        carServiceInstance.saveCar(car);
+        final var result = carServiceInstance.deleteCar(car);
         Assertions.assertEquals(car,result.get());
     }
 
@@ -583,7 +583,7 @@ class InMemoryCarRepositoryTest {
     @DisplayName("delete: error return when car has null plate number in delete operation")
     void error_return_when_car_has_null_plate_numberin_delete_operation() {
         final String plateNumber =null;
-        final var result = inMemoryCarRepository.deleteCar(plateNumber).isEmpty();
+        final var result = carServiceInstance.deleteCarByPlatNumber(plateNumber).isEmpty();
         Assertions.assertTrue(result);
     }
 

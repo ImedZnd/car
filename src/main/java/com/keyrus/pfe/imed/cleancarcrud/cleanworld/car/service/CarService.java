@@ -8,20 +8,20 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
-public class CarService {
+public final class CarService {
 
     private static CarRepository carRepository ;
-    private static CarService carService;
+    private static CarService instance;
 
     private CarService(final CarRepository carRepository) {
         CarService.carRepository = carRepository;
     }
 
     public static synchronized CarService getInstance(final CarRepository carRepository) {
-        if (Objects.isNull(carService)) {
-            carService = new CarService(carRepository);
+        if (Objects.isNull(instance)) {
+            instance = new CarService(carRepository);
         }
-        return carService;
+        return instance;
     }
 
     public Collection<Car> getAllCars() {
@@ -50,6 +50,10 @@ public class CarService {
 
     public Optional<Car> deleteCar(Car car) {
         return carRepository.deleteCar(car);
+    }
+
+    public Collection<Car> deleteAllCars() {
+        return carRepository.deleteAll();
     }
 
     public Optional<Car> deleteCarByPlatNumber(String platNumber) {

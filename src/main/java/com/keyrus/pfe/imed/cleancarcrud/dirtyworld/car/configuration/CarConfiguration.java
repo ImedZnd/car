@@ -10,10 +10,10 @@ import org.springframework.context.annotation.Configuration;
 public class CarConfiguration {
 
     @Bean
-    public CarRepository inMemoryCarRepository(){
+    public CarRepository InMemoryCarRepository(){
         return InMemoryCarRepository.getInstance();
     }
 
     @Bean
-    public CarService carService(){ return CarService.getInstance(inMemoryCarRepository());}
+    public CarService CarService(){ return CarService.getInstance(InMemoryCarRepository());}
 }

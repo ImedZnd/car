@@ -38,12 +38,12 @@ public final class CarController {
     }
 
     @PostMapping("/save")
-    public Either<? extends CarRepository.RepositoryCarError, Car> saveCar(Car car) {
+    public Either<? extends CarService.ServiceCarError, Car> saveCar(Car car) {
         return carServiceInstance.saveCar(car);
     }
 
     @PutMapping("/update")
-    public Either<? extends CarRepository.RepositoryCarError, Car> updateCar(@RequestBody Car car) {
+    public Either<? extends CarService.ServiceCarError, Car> updateCar(@RequestBody Car car) {
         return carServiceInstance.updateCar(car);
     }
 

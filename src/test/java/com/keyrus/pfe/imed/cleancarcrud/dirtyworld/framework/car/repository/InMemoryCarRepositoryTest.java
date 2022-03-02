@@ -587,6 +587,33 @@ class InMemoryCarRepositoryTest {
         Assertions.assertTrue(result);
     }
 
+    @Test
+    @DisplayName("delete: delete all cars should return empty if the repository is empty")
+    void delete_all_cars_should_return_empty_if_the_repository_is_empty() {
+        final var result = inMemoryCarRepository.deleteAll().size();
+        Assertions.assertEquals(0,result);
+    }
+
+    @Test
+    @DisplayName("delete: delete all cars should return empty if the repository is full")
+    void delete_all_cars_should_return_empty_if_the_repository_is_full() {
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(inMemoryCarRepository::saveCar);
+        final var result = inMemoryCarRepository.deleteAll().size();
+        Assertions.assertEquals(0,result);
+    }
+
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();
         final var maxDay = LocalDate.now().minusYears(10).toEpochDay();

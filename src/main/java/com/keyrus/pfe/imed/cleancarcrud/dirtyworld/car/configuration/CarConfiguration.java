@@ -15,5 +15,5 @@ public class CarConfiguration {
     }
 
     @Bean
-    public CarService CarService(){ return CarService.getInstance(InMemoryCarRepository());}
+    public CarService CarService(final CarRepository carRepository){ return CarService.getInstance(carRepository);}
 }

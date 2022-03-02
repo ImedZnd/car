@@ -39,7 +39,7 @@ class CarServiceTest {
         final var result =
                 carServiceInstance.saveCar(car)
                         .getLeft();
-        Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.NullParameterError);
+        Assertions.assertTrue(result instanceof CarService.ServiceCarError.CarWithNullParameterError);
     }
 
     @Test
@@ -79,7 +79,7 @@ class CarServiceTest {
         final var result =
                 carServiceInstance.saveCar(car)
                         .getLeft();
-        Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberAlreadyExistError);
+        Assertions.assertTrue(result instanceof CarService.ServiceCarError.CarWithPlateNumberAlreadyExistError);
     }
 
     @Test
@@ -103,7 +103,7 @@ class CarServiceTest {
         final var result =
                 carServiceInstance.saveCar(car2)
                         .getLeft();
-        Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberAlreadyExistError);
+        Assertions.assertTrue(result instanceof CarService.ServiceCarError.CarWithPlateNumberAlreadyExistError);
     }
 
     @Test
@@ -446,7 +446,7 @@ class CarServiceTest {
                         )
                         .get();
         final var result = carServiceInstance.updateCar(car).getLeft();
-        Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.CarWithPlateNumberNotExistError);
+        Assertions.assertTrue(result instanceof CarService.ServiceCarError.CarWithPlateNumberNotExistError);
     }
 
     @Test
@@ -454,7 +454,7 @@ class CarServiceTest {
     void error_should_be_returned_if_car_is_null_in_update() {
         final Car car = null;
         final var result = carServiceInstance.updateCar(car).getLeft();
-        Assertions.assertTrue(result instanceof CarRepository.RepositoryCarError.NullParameterError);
+        Assertions.assertTrue(result instanceof CarService.ServiceCarError.CarWithNullParameterError);
     }
 
     @Test
@@ -581,10 +581,37 @@ class CarServiceTest {
 
     @Test
     @DisplayName("delete: error return when car has null plate number in delete operation")
-    void error_return_when_car_has_null_plate_numberin_delete_operation() {
+    void error_return_when_car_has_null_plate_number_in_delete_operation() {
         final String plateNumber =null;
         final var result = carServiceInstance.deleteCarByPlatNumber(plateNumber).isEmpty();
         Assertions.assertTrue(result);
+    }
+
+    @Test
+    @DisplayName("delete: delete all cars should return empty when the car service return empty list")
+    void delete_all_cars_should_return_empty_when_the_car_service_return_empty_list() {
+        final var result = carServiceInstance.deleteAllCars().size();
+        Assertions.assertEquals(0,result);
+    }
+
+    @Test
+    @DisplayName("delete: delete all cars should return empty if the car service is full")
+    void delete_all_cars_should_return_empty_if_the_repository_is_full() {
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(carServiceInstance::saveCar);
+        final var result = carServiceInstance.deleteAllCars().size();
+        Assertions.assertEquals(0,result);
     }
 
     private LocalDate generateRandomLocalDateMinusTenYear() {

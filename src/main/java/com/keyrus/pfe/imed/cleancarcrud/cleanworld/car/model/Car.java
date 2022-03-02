@@ -128,10 +128,10 @@ public final class Car {
     private static boolean checkString(String string) {
         return
                 Objects.nonNull(string) &&
-                        checkEmpty(string);
+                        checkStringNotEmpty(string);
     }
 
-    private static boolean checkEmpty(String string) {
+    private static boolean checkStringNotEmpty(String string) {
         return !string.isEmpty();
     }
 

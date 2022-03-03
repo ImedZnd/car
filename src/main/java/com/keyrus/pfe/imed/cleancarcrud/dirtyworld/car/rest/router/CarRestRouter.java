@@ -12,7 +12,6 @@ public class CarRestRouter {
 
     private final CarRestHandler carRestHandler;
 
-
     public CarRestRouter(final CarRestHandler carRestHandler) {
         this.carRestHandler = carRestHandler;
     }
@@ -22,14 +21,14 @@ public class CarRestRouter {
         return RouterFunctions
                 .route()
                 .GET("/",carRestHandler::getAllCars)
-                .GET("/platenumber/{platenumber}",carRestHandler::getCarByPlatNumber)
+                .GET("/plateNumber/{plateNumber}",carRestHandler::getCarByPlatNumber)
                 .GET("/type/{type}",carRestHandler::getAllCarsByType)
                 .GET("/releaseYear/{releaseYear}",carRestHandler::getAllCarsByReleaseYear)
                 .POST("/save",carRestHandler::saveCar)
                 .PUT("/update",carRestHandler::updateCar)
                 .DELETE("/delete",carRestHandler::deleteCar)
                 .DELETE("/deleteAll",carRestHandler::deleteAllCars)
-                .DELETE("/delete/{platenumber}",carRestHandler::deleteCarByPlatNumber)
+                .DELETE("/delete/{plateNumber}",carRestHandler::deleteCarByPlatNumber)
                 .build();
     }
 }

@@ -29,9 +29,11 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Optional<Car> findCarByPlateNumber(final String plateNumber) {
-        return cars.stream()
+        final var carToReturn = cars.stream()
                 .filter(car -> car.getPlatNumber().equals(plateNumber))
                 .findFirst();
+        System.out.println("carToReturn = " + carToReturn);
+        return carToReturn;
     }
 
     @Override
@@ -46,6 +48,7 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> saveCar(final Car car) {
+        System.out.println("car to save in repo" + car);
         return applyOnCarIfExistOrNot(
                 car,
                 (carsCollection, carFound) -> Either.left(new RepositoryCarError.CarWithPlateNumberAlreadyExistError()),
@@ -83,8 +86,9 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Collection<Car> deleteAll() {
-        final var carsToReturn = findAllCars();
+        final var carsToReturn = new HashSet<>(cars);
         cars.clear();
+        System.out.println("carsToReturn = " + carsToReturn);
         return carsToReturn;
     }
 
@@ -98,16 +102,23 @@ public final class InMemoryCarRepository implements CarRepository {
             final Collection<Car> carsCollection,
             final Car car
     ) {
+
+        System.out.println("carsCollection before save = " + carsCollection);
         carsCollection.add(car);
-        return Either.right(car);
+        System.out.println("carsCollection after save = " + carsCollection);
+        final Either<? extends RepositoryCarError, Car> x = Either.right(car);
+        System.out.println("save car either right " + x);
+        return x;
     }
 
     private Either<? extends RepositoryCarError, Car> updateCar(
             final Collection<Car> carsCollection,
             final Car car
     ) {
+        System.out.println("carsCollection before updatee= " + carsCollection);
         carsCollection.remove(findCarByPlateNumber(car.getPlatNumber()).get());
         carsCollection.add(car);
+        System.out.println("carsCollection after updatee= " + carsCollection);
         return Either.right(car);
     }
 
@@ -122,6 +133,7 @@ public final class InMemoryCarRepository implements CarRepository {
             final BiFunction<Collection<Car>, Car, Either<? extends RepositoryCarError, Car>> ifCarExist,
             final Function<Collection<Car>, Either<? extends RepositoryCarError, Car>> ifCarNotExist
     ) {
+        System.out.println("car variable = " + car);
         if (Objects.isNull(car))
             return Either.left(new RepositoryCarError.NullParameterError());
         else if (carExist(car.getPlatNumber()))

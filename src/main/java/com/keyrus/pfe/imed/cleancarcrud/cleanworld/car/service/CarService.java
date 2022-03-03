@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public final class CarService {
 
-    private static CarRepository carRepository ;
+    private static CarRepository carRepository;
     private static CarService instance;
 
     private CarService(final CarRepository carRepository) {
@@ -29,6 +29,7 @@ public final class CarService {
     }
 
     public Optional<Car> getCarByPlatNumber(final String platNumber) {
+        System.out.println("service: platNumber = " + platNumber);
         return carRepository.findCarByPlateNumber(platNumber);
     }
 
@@ -41,12 +42,16 @@ public final class CarService {
     }
 
     public Either<? extends ServiceCarError, Car> saveCar(final Car car) {
-        return carRepository
+        System.out.println("calling save from service" + car);
+        final Either<? extends ServiceCarError, Car> carSaved = carRepository
                 .saveCar(car)
                 .mapLeft(this::carRepositoryErrorToCarServiceError);
+        System.out.println("Car Saved in return = " + carSaved);
+        return carSaved;
     }
 
     public Either<? extends ServiceCarError, Car> updateCar(final Car car) {
+        System.out.println("car in car service = " + car);
         return carRepository
                 .updateCar(car)
                 .mapLeft(this::carRepositoryErrorToCarServiceError);
@@ -57,6 +62,7 @@ public final class CarService {
     }
 
     public Collection<Car> deleteAllCars() {
+        System.out.println("delete all called in service");
         return carRepository.deleteAll();
     }
 
@@ -84,20 +90,20 @@ public final class CarService {
             }
         }
 
-        record CarWithPlateNumberNotExistError(String message) implements ServiceCarError{
-            public CarWithPlateNumberNotExistError(){
+        record CarWithPlateNumberNotExistError(String message) implements ServiceCarError {
+            public CarWithPlateNumberNotExistError() {
                 this("");
             }
         }
 
-        record CarWithNullParameterError(String message) implements ServiceCarError{
-            public CarWithNullParameterError(){
+        record CarWithNullParameterError(String message) implements ServiceCarError {
+            public CarWithNullParameterError() {
                 this("");
             }
         }
 
-        record UnknownError(String message) implements ServiceCarError{
-            public UnknownError(){
+        record UnknownError(String message) implements ServiceCarError {
+            public UnknownError() {
                 this("");
             }
         }

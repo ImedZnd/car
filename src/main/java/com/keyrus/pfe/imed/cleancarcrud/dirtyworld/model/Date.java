@@ -13,7 +13,6 @@ public final class Date {
     private final int month;
     private final int year;
 
-
     public Date(int day, int month, int year) {
         this.day = day;
         this.month = month;
@@ -21,12 +20,14 @@ public final class Date {
     }
 
     public Date(final LocalDate date) {
+        System.out.println("converting LocalDate to Date");
         this.day = date.getDayOfMonth();
         this.month = date.getMonthValue();
         this.year = date.getYear();
     }
 
     public Either<DateTimeException, LocalDate> toLocalDate() {
+        System.out.println("converting a Date to localDate");
         try {
             return
                     Either.right(

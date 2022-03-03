@@ -22,12 +22,21 @@ public class CarDTO {
     private final Date releaseDate;
 
     public CarDTO(final Car car) {
+        System.out.println("creation of carDTO object from car = " + car);
         this.platNumber = car.getPlatNumber();
         this.type = car.getType();
         this.releaseDate = new Date(car.getReleaseDate());
     }
 
+    public CarDTO(CarDTO carDTO) {
+        this.platNumber = carDTO.getPlatNumber();
+        this.type = carDTO.getType();
+        this.releaseDate = carDTO.getReleaseDate();
+    }
+
+
     public Either<Collection<? extends Car.CarError>, Car> toCar() {
+        System.out.println("converting a CarDTO to a Car");
         return
                 releaseDate
                         .toLocalDate()

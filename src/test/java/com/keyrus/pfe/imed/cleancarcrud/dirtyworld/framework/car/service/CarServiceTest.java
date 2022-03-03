@@ -611,7 +611,7 @@ class CarServiceTest {
                 .map(Either::get)
                 .forEach(carServiceInstance::saveCar);
         final var result = carServiceInstance.deleteAllCars().size();
-        Assertions.assertEquals(0,result);
+        Assertions.assertEquals(5,result);
     }
 
     private LocalDate generateRandomLocalDateMinusTenYear() {

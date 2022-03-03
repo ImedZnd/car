@@ -611,7 +611,7 @@ class InMemoryCarRepositoryTest {
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::saveCar);
         final var result = inMemoryCarRepository.deleteAll().size();
-        Assertions.assertEquals(0,result);
+        Assertions.assertEquals(5,result);
     }
 
     private LocalDate generateRandomLocalDateMinusTenYear() {

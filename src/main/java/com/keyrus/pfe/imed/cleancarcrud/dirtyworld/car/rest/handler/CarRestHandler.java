@@ -32,13 +32,14 @@ public class CarRestHandler {
     }
 
     public Mono<ServerResponse> getCarByPlatNumber(final ServerRequest serverRequest) {
-        final var plateNumber = serverRequest.pathVariable("platenumber");
-        return returnCarInOptional(carService.getCarByPlatNumber(plateNumber));
+        System.out.println(" path variable plateNumber = " + serverRequest.pathVariable("plateNumber"));
+        return returnCarInOptional(carService
+                .getCarByPlatNumber(serverRequest.pathVariable("plateNumber")));
     }
 
     public Mono<ServerResponse> getAllCarsByType(final ServerRequest serverRequest) {
-        final var type = serverRequest.pathVariable("type");
-        return returnCollectionOfCarsByCriteria(carService.getAllCarsByType(type));
+        return returnCollectionOfCarsByCriteria(carService
+                .getAllCarsByType(serverRequest.pathVariable("type")));
     }
 
     public Mono<ServerResponse> getAllCarsByReleaseYear(final ServerRequest serverRequest) {
@@ -47,56 +48,85 @@ public class CarRestHandler {
     }
 
     public Mono<ServerResponse> saveCar(final ServerRequest serverRequest) {
-        final var car = serverRequest.bodyToMono(Car.class).block();
-        return applyOnCar(carService.saveCar(car));
+        System.out.println("save car handler called");
+        return serverRequest
+                .bodyToMono(CarDTO.class)
+                .map(CarDTO::toCar)
+                .flatMap(it -> {
+                    if (it.isRight()) {
+                        final var car = carService.saveCar(it.get());
+                        if (car.isRight())
+                            return serverResponseIsOkReturn(new CarDTO(car.get()));
+                        else return serverResponseIsNotOkReturn(car.getLeft());
+                    }
+                    else return serverResponseIsNotOkReturn(it.getLeft());
+                });
     }
 
     public Mono<ServerResponse> updateCar(final ServerRequest serverRequest) {
-        final var carDto = serverRequest.bodyToMono(CarDTO.class).block();
-        final var date = carDto.getReleaseDate().toLocalDate().get();
-        final var car = Car.of(
-                        carDto.getPlatNumber(),
-                        carDto.getType(),
-                        date
-                )
-                .get();
-        return applyOnCar(carService.updateCar(car));
+        System.out.println("update car handler called");
+        return serverRequest
+                .bodyToMono(CarDTO.class)
+                .map(CarDTO::toCar)
+                .flatMap(it -> {
+                    if (it.isRight()) {
+                        final var car = carService.updateCar(it.get());
+                        if (car.isRight()){
+                            System.out.println("car.get() = " + car.get());
+                            return serverResponseIsOkReturn(new CarDTO(car.get()));   
+                        }
+                        else return serverResponseIsNotOkReturn(car.getLeft());
+                    }
+                    else return serverResponseIsNotOkReturn(it.getLeft());
+                });
     }
 
     public Mono<ServerResponse> deleteCar(final ServerRequest serverRequest) {
-        final var car = serverRequest.bodyToMono(Car.class).block();
-        return returnCarInOptional(carService.deleteCar(car));
+        System.out.println("delete car handler called");
+        return serverRequest
+                .bodyToMono(CarDTO.class)
+                .map(CarDTO::toCar)
+                .flatMap(it -> {
+                    if (it.isRight()) {
+                        final var car = carService.deleteCar(it.get());
+                        if (car.isPresent()){
+                            System.out.println("car.get() = " + car.get());
+                            return serverResponseIsOkReturn(new CarDTO(car.get()));
+                        }
+                        else return serverResponseIsNotOkReturn(car);
+                    }
+                    else return serverResponseIsNotOkReturn(it.getLeft());
+                });
     }
 
     public Mono<ServerResponse> deleteAllCars(final ServerRequest serverRequest) {
+        System.out.println("delete all car handler called");
         return returnCollectionOfCarsByCriteria(carService.deleteAllCars());
-
     }
 
     public Mono<ServerResponse> deleteCarByPlatNumber(final ServerRequest serverRequest) {
-        final var platenumber = serverRequest.pathVariable("platenumber");
-        return returnCarInOptional(carService.deleteCarByPlatNumber(platenumber));
-    }
-
-    private Mono<ServerResponse> applyOnCar(final Either<? extends CarService.ServiceCarError, Car> result) {
-        if (result.isRight())
-            return serverResponseIsOkReturn(result);
-        else
-            return serverResponseIsNotOkReturn(result);
+        System.out.println("delete car by plate number handler called");
+        return returnCarInOptional(carService
+                .deleteCarByPlatNumber(serverRequest.pathVariable("plateNumber")
+                ));
     }
 
     private Mono<ServerResponse> returnCarInOptional(final Optional<Car> resultCar) {
-        if (resultCar.isPresent())
-            return serverResponseIsOkReturn(resultCar);
-        else
-            return serverResponseIsNotOkReturn(resultCar);
+        return resultCar
+                .map(this::returnCarOfCarsByCriteria)
+                .orElseGet(() -> serverResponseIsNotOkReturn(resultCar));
     }
 
     private Mono<ServerResponse> returnCollectionOfCarsByCriteria(final Collection<Car> cars) {
         return serverResponseIsOkReturn(cars
                 .stream()
+                .peek(System.out::println)
                 .map(CarDTO::new)
                 .toList());
+    }
+
+    private Mono<ServerResponse> returnCarOfCarsByCriteria(final Car car) {
+        return serverResponseIsOkReturn(new CarDTO(car));
     }
 
     private Mono<ServerResponse> serverResponseIsOkReturn(final Object object) {

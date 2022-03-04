@@ -11,13 +11,17 @@ import org.springframework.context.annotation.Configuration;
 public class CarConfiguration {
 
     @Bean
-    public CarRepository InMemoryCarRepository(){
+    public CarRepository inMemoryCarRepository() {
         return InMemoryCarRepository.getInstance();
     }
 
     @Bean
-    public CarService CarService(final CarRepository carRepository){ return CarService.getInstance(carRepository);}
+    public CarService carService(final CarRepository carRepository) {
+        return CarService.getInstance(carRepository);
+    }
 
     @Bean
-    public CarRestHandler CarRestHandler(final CarService carService){ return CarRestHandler.instance(carService);}
+    public CarRestHandler carRestHandler(final CarService carService) {
+        return CarRestHandler.instance(carService);
+    }
 }

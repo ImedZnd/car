@@ -136,7 +136,7 @@ class CarRestRouterTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isBadRequest();
+                .isNotFound();
     }
 
     @Test

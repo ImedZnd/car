@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class InMemoryCarRepository implements CarRepository {
 
@@ -24,16 +25,16 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Collection<Car> findAllCars() {
-        return Collections.unmodifiableCollection(cars);
+        return cars
+                .stream()
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @Override
     public Optional<Car> findCarByPlateNumber(final String plateNumber) {
-        final var carToReturn = cars.stream()
+        return cars.stream()
                 .filter(car -> car.getPlatNumber().equals(plateNumber))
                 .findFirst();
-        System.out.println("carToReturn = " + carToReturn);
-        return carToReturn;
     }
 
     @Override
@@ -48,7 +49,6 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> saveCar(final Car car) {
-        System.out.println("car to save in repo" + car);
         return applyOnCarIfExistOrNot(
                 car,
                 (carsCollection, carFound) -> Either.left(new RepositoryCarError.CarWithPlateNumberAlreadyExistError()),
@@ -86,9 +86,8 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Collection<Car> deleteAll() {
-        final var carsToReturn = new HashSet<>(cars);
+        final var carsToReturn = findAllCars();
         cars.clear();
-        System.out.println("carsToReturn = " + carsToReturn);
         return carsToReturn;
     }
 
@@ -102,23 +101,16 @@ public final class InMemoryCarRepository implements CarRepository {
             final Collection<Car> carsCollection,
             final Car car
     ) {
-
-        System.out.println("carsCollection before save = " + carsCollection);
         carsCollection.add(car);
-        System.out.println("carsCollection after save = " + carsCollection);
-        final Either<? extends RepositoryCarError, Car> x = Either.right(car);
-        System.out.println("save car either right " + x);
-        return x;
+        return Either.right(car);
     }
 
     private Either<? extends RepositoryCarError, Car> updateCar(
             final Collection<Car> carsCollection,
             final Car car
     ) {
-        System.out.println("carsCollection before updatee= " + carsCollection);
         carsCollection.remove(findCarByPlateNumber(car.getPlatNumber()).get());
         carsCollection.add(car);
-        System.out.println("carsCollection after updatee= " + carsCollection);
         return Either.right(car);
     }
 
@@ -133,7 +125,6 @@ public final class InMemoryCarRepository implements CarRepository {
             final BiFunction<Collection<Car>, Car, Either<? extends RepositoryCarError, Car>> ifCarExist,
             final Function<Collection<Car>, Either<? extends RepositoryCarError, Car>> ifCarNotExist
     ) {
-        System.out.println("car variable = " + car);
         if (Objects.isNull(car))
             return Either.left(new RepositoryCarError.NullParameterError());
         else if (carExist(car.getPlatNumber()))

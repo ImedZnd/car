@@ -78,7 +78,6 @@ public final class Car {
                 );
     }
 
-
     private static Optional<? extends CarError> checkDateOrError(
             final LocalDate localDate,
             final Supplier<? extends CarError> errorSupplier) {

@@ -10,17 +10,17 @@ import java.util.Optional;
 
 public final class CarService {
 
-    private static CarRepository carRepository;
-    private static CarService instance;
+    private final CarRepository carRepository;
 
     private CarService(final CarRepository carRepository) {
-        CarService.carRepository = carRepository;
+        this.carRepository = carRepository;
     }
 
+    private static CarService instance;
+
     public static synchronized CarService getInstance(final CarRepository carRepository) {
-        if (Objects.isNull(instance)) {
+        if (Objects.isNull(instance))
             instance = new CarService(carRepository);
-        }
         return instance;
     }
 
@@ -29,7 +29,6 @@ public final class CarService {
     }
 
     public Optional<Car> getCarByPlatNumber(final String platNumber) {
-        System.out.println("service: platNumber = " + platNumber);
         return carRepository.findCarByPlateNumber(platNumber);
     }
 
@@ -42,16 +41,13 @@ public final class CarService {
     }
 
     public Either<? extends ServiceCarError, Car> saveCar(final Car car) {
-        System.out.println("calling save from service" + car);
-        final Either<? extends ServiceCarError, Car> carSaved = carRepository
-                .saveCar(car)
-                .mapLeft(this::carRepositoryErrorToCarServiceError);
-        System.out.println("Car Saved in return = " + carSaved);
-        return carSaved;
+        return
+                carRepository
+                        .saveCar(car)
+                        .mapLeft(this::carRepositoryErrorToCarServiceError);
     }
 
     public Either<? extends ServiceCarError, Car> updateCar(final Car car) {
-        System.out.println("car in car service = " + car);
         return carRepository
                 .updateCar(car)
                 .mapLeft(this::carRepositoryErrorToCarServiceError);
@@ -62,11 +58,10 @@ public final class CarService {
     }
 
     public Collection<Car> deleteAllCars() {
-        System.out.println("delete all called in service");
         return carRepository.deleteAll();
     }
 
-    public Optional<Car> deleteCarByPlatNumber(final String platNumber) {
+    public Optional<Car> deleteCar(final String platNumber) {
         return carRepository.deleteCar(platNumber);
     }
 

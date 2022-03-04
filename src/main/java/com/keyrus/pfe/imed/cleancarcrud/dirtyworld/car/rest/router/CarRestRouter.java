@@ -17,18 +17,18 @@ public class CarRestRouter {
     }
 
     @Bean
-    public RouterFunction<ServerResponse> carRoute(){
+    public RouterFunction<ServerResponse> carRoute() {
         return RouterFunctions
                 .route()
-                .GET("/",carRestHandler::getAllCars)
-                .GET("/plateNumber/{plateNumber}",carRestHandler::getCarByPlatNumber)
-                .GET("/type/{type}",carRestHandler::getAllCarsByType)
-                .GET("/releaseYear/{releaseYear}",carRestHandler::getAllCarsByReleaseYear)
-                .POST("/save",carRestHandler::saveCar)
-                .PUT("/update",carRestHandler::updateCar)
-                .DELETE("/delete",carRestHandler::deleteCar)
-                .DELETE("/deleteAll",carRestHandler::deleteAllCars)
-                .DELETE("/delete/{plateNumber}",carRestHandler::deleteCarByPlatNumber)
+                .GET("/", serverRequest -> carRestHandler.getAllCars())
+                .GET("/plateNumber/{plateNumber}", carRestHandler::getCarByPlatNumber)
+                .GET("/type/{type}", carRestHandler::getAllCarsByType)
+                .GET("/releaseYear/{releaseYear}", carRestHandler::getAllCarsByReleaseYear)
+                .POST("/save", carRestHandler::saveCar)
+                .PUT("/update", carRestHandler::updateCar)
+                .DELETE("/delete", carRestHandler::deleteCar)
+                .DELETE("/deleteAll", serverRequest -> carRestHandler.deleteAllCars())
+                .DELETE("/delete/{plateNumber}", carRestHandler::deleteCarByPlatNumber)
                 .build();
     }
 }

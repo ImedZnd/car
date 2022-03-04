@@ -1,33 +1,27 @@
 package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.model;
 
 import io.vavr.control.Either;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
 @Data
+@AllArgsConstructor
 public final class Date {
 
     private final int day;
     private final int month;
     private final int year;
 
-    public Date(int day, int month, int year) {
-        this.day = day;
-        this.month = month;
-        this.year = year;
-    }
-
     public Date(final LocalDate date) {
-        System.out.println("converting LocalDate to Date");
         this.day = date.getDayOfMonth();
         this.month = date.getMonthValue();
         this.year = date.getYear();
     }
 
     public Either<DateTimeException, LocalDate> toLocalDate() {
-        System.out.println("converting a Date to localDate");
         try {
             return
                     Either.right(
@@ -41,18 +35,6 @@ public final class Date {
             return
                     Either.left(dateTimeException);
         }
-    }
-
-    public int day() {
-        return day;
-    }
-
-    public int month() {
-        return month;
-    }
-
-    public int year() {
-        return year;
     }
 
 }

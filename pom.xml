@@ -33,9 +33,6 @@
         <archUnit.version>0.23.0</archUnit.version>
         <!--helpers-->
         <vavr.version>1.0.0-alpha-4</vavr.version>
-        <!--sonarcloud-->
-        <sonar.organization>imedznd</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>

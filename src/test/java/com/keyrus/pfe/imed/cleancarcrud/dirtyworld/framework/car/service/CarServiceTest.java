@@ -1,7 +1,6 @@
 package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.service;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
-import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.*;
@@ -583,7 +582,7 @@ class CarServiceTest {
     @DisplayName("delete: error return when car has null plate number in delete operation")
     void error_return_when_car_has_null_plate_number_in_delete_operation() {
         final String plateNumber =null;
-        final var result = carServiceInstance.deleteCarByPlatNumber(plateNumber).isEmpty();
+        final var result = carServiceInstance.deleteCar(plateNumber).isEmpty();
         Assertions.assertTrue(result);
     }
 

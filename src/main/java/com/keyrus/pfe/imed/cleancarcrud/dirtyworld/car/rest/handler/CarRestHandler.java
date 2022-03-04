@@ -115,10 +115,11 @@ public final class CarRestHandler {
     }
 
     private Mono<ServerResponse> optionalToOkServerResponseOrNotFoundServerResponse(final Optional<Car> optional) {
-        return optional
-                .map(CarDTO::new)
-                .map(ServerResponse.ok()::bodyValue)
-                .orElse(ServerResponse.notFound().build());
+        return
+                optional
+                        .map(CarDTO::new)
+                        .map(ServerResponse.ok()::bodyValue)
+                        .orElse(ServerResponse.notFound().build());
     }
 
     private <T> Mono<ServerResponse> bodyValueToOkServerResponse(
@@ -134,66 +135,71 @@ public final class CarRestHandler {
     private Collection<CarDTO> carsToCarsDTO(
             final Collection<Car> cars
     ) {
-        return cars
-                .stream()
-                .map(CarDTO::new)
-                .toList();
+        return
+                cars
+                        .stream()
+                        .map(CarDTO::new)
+                        .toList();
     }
 
     private Mono<ServerResponse> carServiceErrorToBadRequestServerResponseWithErrorHeader(
             final CarService.ServiceCarError carServiceError
     ) {
-        return ServerResponse
-                .badRequest()
-                .header(
-                        "error",
-                        carServiceError.message()
-                )
-                .build();
+        return
+                ServerResponse
+                        .badRequest()
+                        .header(
+                                "error",
+                                carServiceError.message()
+                        )
+                        .build();
     }
 
     private Either<Mono<ServerResponse>, Mono<ServerResponse>> eitherCarServiceErrorOrCarToServerResponse(
             final Either<? extends CarService.ServiceCarError, Car> carServiceErrorOrCar
     ) {
-        return carServiceErrorOrCar
-                .map(CarDTO::new)
-                .map(this::bodyValueToOkServerResponse)
-                .mapLeft(this::carServiceErrorToBadRequestServerResponseWithErrorHeader);
+        return
+                carServiceErrorOrCar
+                        .map(CarDTO::new)
+                        .map(this::bodyValueToOkServerResponse)
+                        .mapLeft(this::carServiceErrorToBadRequestServerResponseWithErrorHeader);
     }
 
     private Mono<ServerResponse> carServiceOperationWithEitherCarServiceErrorOrCarAsResultToServerResponse(
             final Either<Collection<? extends Car.CarError>, Car> carErrorsOrCar,
             final BiFunction<CarService, Car, Either<? extends CarService.ServiceCarError, Car>> applyOnCar
     ) {
-        return carErrorsOrCar
-                .map(car ->
-                        applyOnCar
-                                .apply(
-                                        carService,
-                                        car
-                                )
-                )
-                .mapLeft(this::carErrorsToBadRequestServerResponse)
-                .flatMap(this::eitherCarServiceErrorOrCarToServerResponse)
-                .fold(
-                        it -> it,
-                        it -> it
-                );
+        return
+                carErrorsOrCar
+                        .map(car ->
+                                applyOnCar
+                                        .apply(
+                                                carService,
+                                                car
+                                        )
+                        )
+                        .mapLeft(this::carErrorsToBadRequestServerResponse)
+                        .flatMap(this::eitherCarServiceErrorOrCarToServerResponse)
+                        .fold(
+                                it -> it,
+                                it -> it
+                        );
     }
 
     private Mono<ServerResponse> carErrorsToBadRequestServerResponse(
             final Collection<? extends Car.CarError> carErrors
     ) {
-        return ServerResponse
-                .badRequest()
-                .headers(
-                        header ->
-                                addCarErrorsToResponseErrorHeader(
-                                        header,
-                                        carErrors
-                                )
-                )
-                .build();
+        return
+                ServerResponse
+                        .badRequest()
+                        .headers(
+                                header ->
+                                        addCarErrorsToResponseErrorHeader(
+                                                header,
+                                                carErrors
+                                        )
+                        )
+                        .build();
     }
 
     private void addCarErrorsToResponseErrorHeader(
@@ -218,6 +224,5 @@ public final class CarRestHandler {
                 carError.message()
         );
     }
-
 
 }

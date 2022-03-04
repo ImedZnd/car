@@ -26,7 +26,7 @@ public class CarRestRouter {
                 .GET("/releaseYear/{releaseYear}", carRestHandler::getAllCarsByReleaseYear)
                 .POST("/save", carRestHandler::saveCar)
                 .PUT("/update", carRestHandler::updateCar)
-                .DELETE("/delete", carRestHandler::deleteCar)
+                .POST("/delete", carRestHandler::deleteCar)
                 .DELETE("/deleteAll", serverRequest -> carRestHandler.deleteAllCars())
                 .DELETE("/delete/{plateNumber}", carRestHandler::deleteCarByPlatNumber)
                 .build();

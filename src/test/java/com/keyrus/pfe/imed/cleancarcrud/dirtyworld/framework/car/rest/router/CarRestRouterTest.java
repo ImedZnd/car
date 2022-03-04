@@ -297,6 +297,7 @@ class CarRestRouterTest {
                 .expectStatus()
                 .isBadRequest();
     }
+
     @Test
     @DisplayName("error return on save operation with bad year")
     void error_return_on_save_operation_with_bad_year() {
@@ -420,7 +421,7 @@ class CarRestRouterTest {
                 .expectStatus()
                 .isNotFound()
                 .expectBodyList(CarDTO.class)
-                .hasSize(1);
+                .hasSize(0);
     }
 
     @Test
@@ -448,7 +449,7 @@ class CarRestRouterTest {
                 .body(BodyInserters.fromValue(carDTO))
                 .exchange()
                 .expectStatus()
-                .isNotFound()
+                .isOk()
                 .expectBodyList(CarDTO.class)
                 .hasSize(1);
     }
@@ -492,5 +493,42 @@ class CarRestRouterTest {
                 .isOk()
                 .expectBodyList(CarDTO.class)
                 .hasSize(5);
+    }
+
+    @Test
+    @DisplayName("error return in delete car with plate number car not in repo")
+    void error_return_in_delete_car_with_plate_number_car_not_in_repo() {
+        final var plateNumber= "xxTNxxx";
+        webTestClient
+                .delete()
+                .uri("/delete/" + plateNumber)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
+    }
+
+
+    @Test
+    @DisplayName("car return in delete with plate number car exist")
+    void car_return_in_delete_with_plate_number_car_exist() {
+        final var plateNumber = "222TN2222";
+        final var car =
+                Car.of(
+                                plateNumber,
+                                "xxxx",
+                                LocalDate.of(2020, 10, 10)
+                        )
+                        .get();
+        carServiceInstance.saveCar(car);
+        webTestClient
+                .delete()
+                .uri("/delete/" + plateNumber)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBodyList(CarDTO.class)
+                .hasSize(1);
     }
 }

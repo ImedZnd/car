@@ -29,11 +29,10 @@
     <properties>
         <!--java-->
         <java.version>17</java.version>
+        <!--tests-->
+        <archUnit.version>0.23.0</archUnit.version>
         <!--helpers-->
         <vavr.version>1.0.0-alpha-4</vavr.version>
-        <!--sonarcloud-->
-        <sonar.organization>imedznd</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -68,7 +67,6 @@
             <version>${vavr.version}</version>
         </dependency>
 
-
         <!--test-->
 
         <dependency>
@@ -81,7 +79,12 @@
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit</artifactId>
+            <version>${archUnit.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

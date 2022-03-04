@@ -44,7 +44,6 @@ class CarTest {
                                 releaseDate
                         )
                         .getLeft();
-
         assertAll(
                 () -> assertEquals(1, result.size()),
                 () -> assertTrue(result.stream().allMatch(it -> it instanceof Car.CarError.PlateNumberError))
@@ -64,7 +63,6 @@ class CarTest {
                                 releaseDate
                         )
                         .getLeft();
-
         assertAll(
                 () -> assertEquals(1, result.size()),
                 () -> assertTrue(result.stream().allMatch(it -> it instanceof Car.CarError.TypeError))
@@ -84,7 +82,6 @@ class CarTest {
                                 releaseDate
                         )
                         .getLeft();
-
         assertAll(
                 () -> assertEquals(1, result.size()),
                 () -> assertTrue(result.stream().allMatch(it -> it instanceof Car.CarError.ReleaseDateError))
@@ -104,7 +101,6 @@ class CarTest {
                                 releaseDate
                         )
                         .getLeft();
-
         assertAll(
                 () -> assertEquals(3, result.size()),
                 () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.PlateNumberError)),
@@ -126,7 +122,6 @@ class CarTest {
                                 releaseDate
                         )
                         .getLeft();
-
         assertAll(
                 () -> assertEquals(3, result.size()),
                 () -> assertTrue(result.stream().anyMatch(it -> it instanceof Car.CarError.PlateNumberError)),

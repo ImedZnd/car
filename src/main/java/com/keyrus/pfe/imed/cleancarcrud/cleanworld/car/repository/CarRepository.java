@@ -41,6 +41,7 @@ public interface CarRepository {
                 this("");
             }
         }
+
         record NullParameterError(String message) implements RepositoryCarError {
             public NullParameterError() {
                 this("");

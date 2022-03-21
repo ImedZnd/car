@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CleancarcrudApplicationTest {
+@ContextConfiguration(initializers = {Initializer.class})
+public class CleancarcrudApplicationTest {
 
     @Test
-    void contextLoad(){
+    void contextLoad() {
 
     }
 }

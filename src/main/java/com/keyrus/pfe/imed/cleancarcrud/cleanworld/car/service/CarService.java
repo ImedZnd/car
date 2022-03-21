@@ -7,6 +7,8 @@ import io.vavr.control.Either;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public final class CarService {
 
@@ -63,6 +65,16 @@ public final class CarService {
 
     public Optional<Car> deleteCar(final String platNumber) {
         return carRepository.deleteCar(platNumber);
+    }
+
+    private Either<? extends CarService.ServiceCarError, Car> operateOnCarRepositoryForEitherAndPublishEvent(
+            Function<CarRepository, Either<? extends CarService.ServiceCarError, Car>> operationOnCarRepository,
+            Consumer<CarRepository> publishEvent
+    ) {
+        final var operationOnCarRepositoryResult = operationOnCarRepository.apply(carRepository);
+        if (operationOnCarRepositoryResult.isRight())
+            publishEvent.accept(carRepository);
+        return operationOnCarRepositoryResult;
     }
 
     private ServiceCarError carRepositoryErrorToCarServiceError(final CarRepository.RepositoryCarError repositoryCarError) {

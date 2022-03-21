@@ -2,10 +2,13 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.service;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import io.vavr.control.Either;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.UUID;

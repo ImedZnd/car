@@ -43,20 +43,27 @@ public final class CarService {
     }
 
     public Either<? extends ServiceCarError, Car> saveCar(final Car car) {
-        return
-                carRepository
-                        .saveCar(car)
-                        .mapLeft(this::carRepositoryErrorToCarServiceError);
+        return operateOnCarRepositoryForEitherAndPublishEvent(
+                it ->
+                        it.saveCar(car)
+                                .mapLeft(this::carRepositoryErrorToCarServiceError),
+                it -> it.publishSaveCar(car)
+        );
     }
 
     public Either<? extends ServiceCarError, Car> updateCar(final Car car) {
-        return carRepository
-                .updateCar(car)
-                .mapLeft(this::carRepositoryErrorToCarServiceError);
+        return operateOnCarRepositoryForEitherAndPublishEvent(
+                it ->
+                        it.updateCar(car)
+                                .mapLeft(this::carRepositoryErrorToCarServiceError),
+                it -> it.publishUpdateCar(car)
+        );
     }
 
     public Optional<Car> deleteCar(final Car car) {
-        return carRepository.deleteCar(car);
+        final var carIsDeleted = carRepository.deleteCar(car);
+        carIsDeleted.ifPresent(carRepository::publishDeleteCar);
+        return carIsDeleted;
     }
 
     public Collection<Car> deleteAllCars() {
@@ -64,7 +71,9 @@ public final class CarService {
     }
 
     public Optional<Car> deleteCar(final String platNumber) {
-        return carRepository.deleteCar(platNumber);
+        final var carIsDeleted = carRepository.deleteCar(platNumber);
+        carIsDeleted.ifPresent(carRepository::publishDeleteCar);
+        return carIsDeleted;
     }
 
     private Either<? extends CarService.ServiceCarError, Car> operateOnCarRepositoryForEitherAndPublishEvent(

@@ -2,11 +2,16 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.repository;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import io.vavr.control.Either;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -19,18 +24,52 @@ import java.util.stream.IntStream;
 class InMemoryCarRepositoryTest {
 
     private final InMemoryCarRepository inMemoryCarRepository;
+    private final RabbitAdmin rabbitAdmin;
+    private final CarEventSettings carEventSettings;
 
-    InMemoryCarRepositoryTest(@Autowired final InMemoryCarRepository inMemoryCarRepository) {
+    InMemoryCarRepositoryTest(
+            @Autowired final InMemoryCarRepository inMemoryCarRepository,
+            @Autowired final RabbitAdmin rabbitAdmin,
+            @Autowired final CarEventSettings carEventSettings
+    ) {
         this.inMemoryCarRepository = inMemoryCarRepository;
+        this.rabbitAdmin = rabbitAdmin;
+        this.carEventSettings = carEventSettings;
+    }
+
+    @BeforeAll
+    public void beforeAll() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        inMemoryCarRepository.deleteAll();
     }
 
     @BeforeEach
-    void beforeEach() {
+    public void beforeEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
         inMemoryCarRepository.deleteAll();
     }
 
     @AfterEach
-    void afterEach() {
+    public void afterEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        inMemoryCarRepository.deleteAll();
+    }
+
+    @AfterAll
+    public void afterAll() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
         inMemoryCarRepository.deleteAll();
     }
 

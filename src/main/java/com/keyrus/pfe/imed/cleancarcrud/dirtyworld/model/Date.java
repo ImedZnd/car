@@ -3,17 +3,20 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.model;
 import io.vavr.control.Either;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public final class Date {
 
-    private final int day;
-    private final int month;
-    private final int year;
+    private int day;
+    private int month;
+    private int year;
 
     public Date(final LocalDate date) {
         this.day = date.getDayOfMonth();

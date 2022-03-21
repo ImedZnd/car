@@ -1,6 +1,7 @@
 package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.rest.router;
 
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.rest.handler.CarRestHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
@@ -12,7 +13,7 @@ public class CarRestRouter {
 
     private final CarRestHandler carRestHandler;
 
-    public CarRestRouter(final CarRestHandler carRestHandler) {
+    public CarRestRouter(@Autowired final CarRestHandler carRestHandler) {
         this.carRestHandler = carRestHandler;
     }
 

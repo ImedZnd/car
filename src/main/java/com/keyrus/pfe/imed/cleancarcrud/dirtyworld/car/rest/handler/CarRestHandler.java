@@ -2,7 +2,7 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.rest.handler;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
-import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.dto.CarDTO;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.dto.CarDTO;
 import io.vavr.control.Either;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -78,8 +78,8 @@ public final class CarRestHandler {
                         .map(CarDTO::toCar)
                         .flatMap(carErrorsOrCar -> carServiceOperationWithEitherCarServiceErrorOrCarAsResultToServerResponse(carErrorsOrCar, CarService::saveCar));
     }
-
     public Mono<ServerResponse> updateCar(final ServerRequest serverRequest) {
+        System.out.println("serverRequest.bodyToMono(CarDTO.class) = " + serverRequest.bodyToMono(CarDTO.class));
         return
                 serverRequest
                         .bodyToMono(CarDTO.class)
@@ -224,5 +224,6 @@ public final class CarRestHandler {
                 carError.message()
         );
     }
+
 
 }

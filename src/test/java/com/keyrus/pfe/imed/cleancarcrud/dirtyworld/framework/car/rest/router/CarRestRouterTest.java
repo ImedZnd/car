@@ -2,13 +2,13 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.rest.router;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
-import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.dto.CarDTO;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.dto.CarDTO;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.model.Date;
 import io.vavr.control.Either;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,26 +21,46 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
-@WebFluxTest
+@SpringBootTest
+@ContextConfiguration(initializers = {Initializer.class})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@AutoConfigureWebTestClient
 class CarRestRouterTest {
 
-    final CarService carServiceInstance;
+    private final CarService carService;
+    private WebTestClient webTestClient;
+    @Autowired
+    private final RabbitAdmin rabbitAdmin;
+    private final CarEventSettings carEventSettings;
 
-    private final WebTestClient webTestClient;
-
-    CarRestRouterTest(@Autowired CarService carServiceInstance, @Autowired WebTestClient webTestClient) {
-        this.carServiceInstance = carServiceInstance;
+    CarRestRouterTest(
+            @Autowired final CarService carService,
+            @Autowired final WebTestClient webTestClient,
+            @Autowired final RabbitAdmin rabbitAdmin,
+            @Autowired final CarEventSettings carEventSettings
+    ) {
+        this.carService = carService;
         this.webTestClient = webTestClient;
+        this.rabbitAdmin = rabbitAdmin;
+        this.carEventSettings = carEventSettings;
     }
 
     @BeforeEach
-    void beforeEach() {
-        carServiceInstance.deleteAllCars();
+    public void beforeEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        carService.deleteAllCars();
     }
 
     @AfterEach
-    void afterEach() {
-        carServiceInstance.deleteAllCars();
+    public void afterEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        carService.deleteAllCars();
     }
 
     @Test
@@ -72,7 +92,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .get()
                 .uri("/")
@@ -94,7 +114,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .get()
                 .uri("/")
@@ -117,7 +137,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .get()
                 .uri("/plateNumber/" + plateNumber)
@@ -151,7 +171,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -164,7 +184,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .get()
                 .uri("/type/BMW")
@@ -192,7 +212,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .get()
                 .uri("/type/" + type)
@@ -220,7 +240,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .get()
                 .uri("/releaseYear/" + releaseYear)
@@ -248,7 +268,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .get()
                 .uri("/releaseYear/" + releaseYear)
@@ -336,7 +356,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .post()
                 .uri("/save")
@@ -362,7 +382,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .delete()
                 .uri("/deleteAll")
@@ -391,7 +411,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .put()
                 .uri("/update")
@@ -443,7 +463,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .post()
                 .uri("/delete")
@@ -485,7 +505,7 @@ class CarRestRouterTest {
                         )
                 )
                 .map(Either::get)
-                .forEach(carServiceInstance::saveCar);
+                .forEach(carService::saveCar);
         webTestClient
                 .delete()
                 .uri("/deleteAll")
@@ -522,7 +542,7 @@ class CarRestRouterTest {
                                 LocalDate.of(2020, 10, 10)
                         )
                         .get();
-        carServiceInstance.saveCar(car);
+        carService.saveCar(car);
         webTestClient
                 .delete()
                 .uri("/delete/" + plateNumber)

@@ -31,7 +31,16 @@ public final class InMemoryCarRepository implements CarRepository {
         return instance;
     }
 
-    private InMemoryCarRepository() {
+    @Autowired
+    private final RabbitTemplate rabbitTemplate;
+    private final CarEventSettings carEventSettings;
+
+    private InMemoryCarRepository(
+            @Autowired final RabbitTemplate rabbitTemplate,
+            final CarEventSettings carEventSettings
+    ) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.carEventSettings = carEventSettings;
     }
 
     private final Collection<Car> cars = new HashSet<>();
@@ -79,6 +88,7 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> updateCar(final Car car) {
+        System.out.println("car = " + car);
         return
                 applyOnCarIfExistOrNot(
                         car,

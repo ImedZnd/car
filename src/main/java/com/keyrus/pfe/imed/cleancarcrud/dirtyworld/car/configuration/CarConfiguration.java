@@ -2,6 +2,8 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.configuration;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.handler.CarCrashQueueHandler;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.rest.handler.CarRestHandler;
 import lombok.AllArgsConstructor;
@@ -21,8 +23,14 @@ import org.springframework.stereotype.Service;
 public class CarConfiguration {
 
     @Bean
-    public CarRepository inMemoryCarRepository() {
-        return InMemoryCarRepository.getInstance();
+    public CarRepository inMemoryCarRepository(
+            @Autowired final RabbitTemplate rabbitTemplate,
+            final CarEventSettings carEventSettings
+    ) {
+        return InMemoryCarRepository.instance(
+                rabbitTemplate,
+                carEventSettings
+        );
     }
 
     @Bean
@@ -33,6 +41,11 @@ public class CarConfiguration {
     @Bean
     public CarRestHandler carRestHandler(final CarService carService) {
         return CarRestHandler.instance(carService);
+    }
+
+    @Bean
+    public CarCrashQueueHandler carCrashQueueHandler(final CarService carService) {
+        return CarCrashQueueHandler.instance(carService);
     }
 }
 

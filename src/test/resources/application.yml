@@ -1,0 +1,35 @@
+spring:
+  rabbitmq:
+    username: guest
+    password: guest
+  cloud:
+    function:
+      definition: carCrashedListener
+    stream:
+      bindings:
+        carCrashedListener-in-0:
+          destination: carcrashedexchange
+          group: carcrashedqueue
+      rabbit:
+        bindings:
+          carCrashedListener-in-0:
+            consumer:
+              queueNameGroupOnly: true
+              binding-routing-key-delimiter: ","
+              bindingRoutingKey: "carcrashedroutingkey"
+              exchangeType: direct
+              autoBindDlq: false
+car:
+  event:
+    save:
+      queue: savequeue
+      exchange: saveexchange
+      routingKey: saveroutingkey
+    update:
+      queue: updatequeue
+      exchange: updateexchange
+      routingkey: updateroutingkey
+    delete:
+      queue: deletequeue
+      exchange: deleteexchange
+      routingkey: deleteroutingkey

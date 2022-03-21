@@ -26,6 +26,12 @@ public interface CarRepository {
 
     Collection<Car> deleteAll();
 
+    void publishSaveCar(Car car);
+
+    void publishUpdateCar(Car car);
+
+    void publishDeleteCar(Car car);
+
     sealed interface RepositoryCarError {
 
         String message();

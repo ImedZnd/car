@@ -2,11 +2,16 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.repository;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import io.vavr.control.Either;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -14,21 +19,57 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @SpringBootTest
+@ContextConfiguration(initializers = {Initializer.class})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InMemoryCarRepositoryTest {
 
     private final InMemoryCarRepository inMemoryCarRepository;
+    private final RabbitAdmin rabbitAdmin;
+    private final CarEventSettings carEventSettings;
 
-    InMemoryCarRepositoryTest(@Autowired final InMemoryCarRepository inMemoryCarRepository) {
+    InMemoryCarRepositoryTest(
+            @Autowired final InMemoryCarRepository inMemoryCarRepository,
+            @Autowired final RabbitAdmin rabbitAdmin,
+            @Autowired final CarEventSettings carEventSettings
+    ) {
         this.inMemoryCarRepository = inMemoryCarRepository;
+        this.rabbitAdmin = rabbitAdmin;
+        this.carEventSettings = carEventSettings;
+    }
+
+    @BeforeAll
+    public void beforeAll() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        inMemoryCarRepository.deleteAll();
     }
 
     @BeforeEach
-    void beforeEach() {
+    public void beforeEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
         inMemoryCarRepository.deleteAll();
     }
 
     @AfterEach
-    void afterEach() {
+    public void afterEach() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
+        inMemoryCarRepository.deleteAll();
+    }
+
+    @AfterAll
+    public void afterAll() {
+        rabbitAdmin.purgeQueue(carEventSettings.save().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.update().queue());
+        rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
+        rabbitAdmin.purgeQueue("carcrashedqueue");
         inMemoryCarRepository.deleteAll();
     }
 
@@ -613,6 +654,129 @@ class InMemoryCarRepositoryTest {
         final var result = inMemoryCarRepository.deleteAll().size();
         Assertions.assertEquals(5, result);
     }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("save queue have one car on publish on save")
+    void save_queue_have_one_car_on_push_on_save() {
+        final var car =
+                Car.of(
+                                "222TN2222",
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                        .get();
+        inMemoryCarRepository.publishSaveCar(car);
+        Thread.sleep(200);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
+        Assertions.assertEquals(1, result);
+    }
+
+    @Test
+    @DisplayName("no element in save queue publish a null car")
+    void no_element_in_save_queue_publish_a_null_car() {
+        final Car car = null;
+        inMemoryCarRepository.publishSaveCar(car);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
+        Assertions.assertEquals(0, result);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("publish save have five elements on publish five valid cars")
+    void publish_save_have_five_elements_on_publish_five_valid_cars() {
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(inMemoryCarRepository::publishSaveCar);
+        Thread.sleep(1000);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
+        Assertions.assertEquals(size, result);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("update queue have one car on push on update")
+    void update_queue_have_one_car_on_push_on_update() {
+        final var car =
+                Car.of(
+                                "222TN2222",
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                        .get();
+        inMemoryCarRepository.publishUpdateCar(car);
+        Thread.sleep(1000);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        Assertions.assertEquals(1, result);
+    }
+
+    @Test
+    @DisplayName("no element in update queue publish a null car")
+    void no_element_in_update_queue_publish_a_null_car() {
+        final Car car = null;
+        inMemoryCarRepository.publishUpdateCar(car);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        Assertions.assertEquals(0, result);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName(" five cars when publish five car to the update queue")
+    void _five_cars_when_publish_five_car_to_the_update_queue() {
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(inMemoryCarRepository::publishUpdateCar);
+        Thread.sleep(1000);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        Assertions.assertEquals(size, result);
+    }
+
+    @Test
+    @SneakyThrows
+    @DisplayName("one car in delete queue when push one car ")
+    void one_car_in_delete_queue_when_push_one_car() {
+        final var car =
+                Car.of(
+                                "222TN2222",
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                        .get();
+        inMemoryCarRepository.publishDeleteCar(car);
+        Thread.sleep(1000);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
+        Assertions.assertEquals(1, result);
+    }
+
+    @Test
+    @DisplayName("no elements in delete queue when push null value to the delete queue")
+    void no_elements_in_delete_queue_when_push_null_value_to_the_delete_queue() {
+        final Car car = null;
+        inMemoryCarRepository.publishDeleteCar(car);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
+        Assertions.assertEquals(0, result);
+    }
+
 
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();

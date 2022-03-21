@@ -2,7 +2,10 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.repository.CarRepository;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
 import io.vavr.control.Either;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -12,13 +15,32 @@ import java.util.stream.Collectors;
 
 public final class InMemoryCarRepository implements CarRepository {
 
-    private static final InMemoryCarRepository instance = new InMemoryCarRepository();
 
-    public static InMemoryCarRepository getInstance() {
+    private static InMemoryCarRepository instance = null;
+
+    public static synchronized InMemoryCarRepository instance(
+            final RabbitTemplate rabbitTemplate,
+            final CarEventSettings carEventSettings
+    ) {
+        if (Objects.isNull(instance))
+            instance =
+                    new InMemoryCarRepository(
+                            rabbitTemplate,
+                            carEventSettings
+                    );
         return instance;
     }
 
-    private InMemoryCarRepository() {
+    @Autowired
+    private final RabbitTemplate rabbitTemplate;
+    private final CarEventSettings carEventSettings;
+
+    private InMemoryCarRepository(
+            @Autowired final RabbitTemplate rabbitTemplate,
+            final CarEventSettings carEventSettings
+    ) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.carEventSettings = carEventSettings;
     }
 
     private final Collection<Car> cars = new HashSet<>();
@@ -66,6 +88,7 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> updateCar(final Car car) {
+        System.out.println("car = " + car);
         return
                 applyOnCarIfExistOrNot(
                         car,
@@ -101,6 +124,48 @@ public final class InMemoryCarRepository implements CarRepository {
         final var carsToReturn = findAllCars();
         cars.clear();
         return carsToReturn;
+    }
+
+    @Override
+    public void publishSaveCar(final Car car) {
+        if (!Objects.isNull(car))
+            this.publishEvent(
+                car.getPlatNumber(),
+                carEventSettings.save().exchange(),
+                carEventSettings.save().routingkey()
+        );
+    }
+
+    @Override
+    public void publishUpdateCar(final Car car) {
+        if (!Objects.isNull(car))
+            this.publishEvent(
+                car.getPlatNumber(),
+                carEventSettings.update().exchange(),
+                carEventSettings.update().routingkey()
+        );
+    }
+
+    @Override
+    public void publishDeleteCar(final Car car) {
+        if (!Objects.isNull(car))
+            this.publishEvent(
+                car.getPlatNumber(),
+                carEventSettings.delete().exchange(),
+                carEventSettings.delete().routingkey()
+        );
+    }
+
+    private void publishEvent(
+            final String plateNumber,
+            final String exchange,
+            final String routingKey
+    ) {
+        rabbitTemplate.convertAndSend(
+                exchange,
+                routingKey,
+                plateNumber
+        );
     }
 
     private Collection<Car> findAllCarsByCriteria(final Predicate<Car> criteria) {

@@ -1,17 +1,17 @@
-package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.dto;
+package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.dto;
 
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.model.Date;
 import io.vavr.control.Either;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
-public final class CarDTO {
+public final class CarDTO implements Serializable {
 
     private final String platNumber;
     private final String type;

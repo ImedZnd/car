@@ -709,7 +709,7 @@ class CarServiceTest {
                 )
                 .map(Either::get)
                 .forEach(carServiceInstance::saveCar);
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -738,7 +738,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.updateCar(car2).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -749,10 +749,12 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and queue with null car in update operation")
     void no_elements_exist_in_repo_and_queue_with_null_car_in_update_operation() {
         final Car car = null;
         final var carResult = carServiceInstance.updateCar(car).getLeft();
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -775,7 +777,7 @@ class CarServiceTest {
                         .get();
         carServiceInstance.saveCar(car);
         final var carResult = carServiceInstance.deleteCar(car).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -786,10 +788,12 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and delete queue with null car in delete operation")
     void no_elements_exist_in_repo_and_delete_queue_with_null_car_in_delete_operation() {
         final Car car = null;
         final var carResult = carServiceInstance.deleteCar(car);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -800,6 +804,7 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and delete queue with valid car not exist in delete operation")
     void no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation() {
         final var car =
@@ -810,6 +815,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.deleteCar(car);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(

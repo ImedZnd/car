@@ -20,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
+@Disabled
 @SpringBootTest
 @ContextConfiguration(initializers = {Initializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

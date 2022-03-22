@@ -12,7 +12,7 @@
 
     <groupId>com.keyrus.pfe.imed</groupId>
     <artifactId>cleancarcrud</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1</version>
     <name>cleancarcrud</name>
     <description>prove of concept for a car crud apis with clean architecture</description>
 
@@ -141,7 +141,7 @@
     </dependencyManagement>
 
     <build>
-
+        <finalName>car-clean-crud</finalName>
         <plugins>
 
             <!--helper-->

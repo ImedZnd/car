@@ -27,6 +27,9 @@
     </developers>
 
     <properties>
+        <!--sonar-->
+        <sonar.organization>imedznd</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!--java-->
         <java.version>17</java.version>
         <!--tests-->

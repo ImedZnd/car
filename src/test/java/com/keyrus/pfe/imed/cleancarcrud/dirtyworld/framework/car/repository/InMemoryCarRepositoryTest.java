@@ -777,7 +777,6 @@ class InMemoryCarRepositoryTest {
         Assertions.assertEquals(0, result);
     }
 
-
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();
         final var maxDay = LocalDate.now().minusYears(10).toEpochDay();

@@ -79,7 +79,6 @@ public final class CarRestHandler {
                         .flatMap(carErrorsOrCar -> carServiceOperationWithEitherCarServiceErrorOrCarAsResultToServerResponse(carErrorsOrCar, CarService::saveCar));
     }
     public Mono<ServerResponse> updateCar(final ServerRequest serverRequest) {
-        System.out.println("serverRequest.bodyToMono(CarDTO.class) = " + serverRequest.bodyToMono(CarDTO.class));
         return
                 serverRequest
                         .bodyToMono(CarDTO.class)

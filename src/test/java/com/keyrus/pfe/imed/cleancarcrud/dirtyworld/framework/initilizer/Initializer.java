@@ -19,11 +19,12 @@ public class Initializer implements ApplicationContextInitializer<ConfigurableAp
         final GenericContainer rabbitMqContainer =
                 new GenericContainer<>("rabbitmq:management")
                         .withExposedPorts(5672, 15672);
-
+        System.out.println("starting rabbitmq container = " + rabbitMqContainer.getHost());
         rabbitMqContainer.start();
-        while (!rabbitMqContainer.isRunning())
+        while (!rabbitMqContainer.isRunning()) {
+            System.out.println("starting  ...");
             Thread.sleep(15000);
-
+        }
         TestPropertyValues
                 .of(
                         "spring.rabbitmq.host=" + rabbitMqContainer.getHost(),

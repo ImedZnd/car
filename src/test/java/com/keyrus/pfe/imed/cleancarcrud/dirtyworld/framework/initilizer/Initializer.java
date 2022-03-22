@@ -25,7 +25,9 @@ public class Initializer implements ApplicationContextInitializer<ConfigurableAp
             System.out.println("starting  ...");
             Thread.sleep(15000);
         }
-        TestPropertyValues
+        if(rabbitMqContainer.isRunning())
+            System.out.println("rabbit is running");
+            TestPropertyValues
                 .of(
                         "spring.rabbitmq.host=" + rabbitMqContainer.getHost(),
                         "spring.rabbitmq.port=" + rabbitMqContainer.getMappedPort(5672)

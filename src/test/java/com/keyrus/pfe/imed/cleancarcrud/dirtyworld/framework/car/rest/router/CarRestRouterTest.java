@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.IntStream;
 
+@Disabled
 @SpringBootTest
 @ContextConfiguration(initializers = {Initializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

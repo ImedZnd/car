@@ -22,7 +22,7 @@ public class Initializer implements ApplicationContextInitializer<ConfigurableAp
 
         rabbitMqContainer.start();
         while (!rabbitMqContainer.isRunning())
-            Thread.sleep(1000);
+            Thread.sleep(5000);
 
         TestPropertyValues
                 .of(

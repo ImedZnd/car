@@ -53,7 +53,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Deploy to Heroku #set the whatever name you want to this step
+      - name: Deploy to Heroku
         id: heroku
         uses: snithyanantham/docker-compose-multiple-apps-heroku-deploy@v1.0
         with:

@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: docker login
         run: |
-          docker login -u ${{secrets.DOCKER_EMAIL}} -p ${{secrets.DOCKER_PASS}}
+          docker login -u imedznd -p ${{secrets.DOCKER_PASS}}
       - name: Build the Docker image
         run: docker build . --file Dockerfile --tag imedznd/clean-car:$(date +%s)
 

@@ -668,7 +668,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.saveCar(car).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(

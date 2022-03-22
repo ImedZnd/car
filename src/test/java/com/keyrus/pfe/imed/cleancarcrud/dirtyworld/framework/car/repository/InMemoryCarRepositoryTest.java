@@ -667,7 +667,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishSaveCar(car);
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }
@@ -698,7 +698,7 @@ class InMemoryCarRepositoryTest {
                 )
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::publishSaveCar);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
     }
@@ -715,7 +715,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishUpdateCar(car);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }
@@ -746,7 +746,7 @@ class InMemoryCarRepositoryTest {
                 )
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::publishUpdateCar);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
     }
@@ -763,7 +763,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishDeleteCar(car);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }

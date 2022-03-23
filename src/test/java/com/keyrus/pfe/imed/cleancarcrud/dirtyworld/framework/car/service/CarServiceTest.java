@@ -16,7 +16,6 @@ import org.springframework.test.context.ContextConfiguration;
 import java.time.LocalDate;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -784,7 +783,7 @@ class CarServiceTest {
                         .get();
         carServiceInstance.saveCar(car);
         final var carResult = carServiceInstance.deleteCar(car).get();
-        TimeUnit.MINUTES.sleep(1);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
 

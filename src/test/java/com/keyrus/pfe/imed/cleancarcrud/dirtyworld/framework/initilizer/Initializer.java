@@ -23,7 +23,7 @@ public class Initializer implements ApplicationContextInitializer<ConfigurableAp
         rabbitMqContainer.start();
         while (!rabbitMqContainer.isRunning()) {
             System.out.println("starting  ...");
-            Thread.sleep(1000);
+            Thread.sleep(3000);
         }
         if(rabbitMqContainer.isRunning())
             System.out.println("rabbit is running");
@@ -41,7 +41,7 @@ public class Initializer implements ApplicationContextInitializer<ConfigurableAp
             public void onApplicationEvent(ContextClosedEvent event) {
                 rabbitMqContainer.stop();
                 while (rabbitMqContainer.isRunning())
-                    Thread.sleep(200);
+                    Thread.sleep(3000);
             }
         };
 

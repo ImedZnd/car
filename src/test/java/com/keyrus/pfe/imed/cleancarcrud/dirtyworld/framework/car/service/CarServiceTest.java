@@ -3,6 +3,7 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.service;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import io.vavr.control.Either;
 import lombok.SneakyThrows;
@@ -23,15 +24,18 @@ import java.util.stream.IntStream;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CarServiceTest {
 
+    private final InMemoryCarRepository inMemoryCarRepository;
     private final CarService carServiceInstance;
     private final RabbitAdmin rabbitAdmin;
     private final CarEventSettings carEventSettings;
 
     CarServiceTest(
+            @Autowired final InMemoryCarRepository inMemoryCarRepository,
             @Autowired final CarService carServiceInstance,
             @Autowired final RabbitAdmin rabbitAdmin,
             @Autowired final CarEventSettings carEventSettings
     ) {
+        this.inMemoryCarRepository = inMemoryCarRepository;
         this.carServiceInstance = carServiceInstance;
         this.rabbitAdmin = rabbitAdmin;
         this.carEventSettings = carEventSettings;
@@ -840,6 +844,35 @@ class CarServiceTest {
         System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         System.out.println("CarServiceTest.no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation");
     }
+
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    @Test
+    @SneakyThrows
+    @DisplayName(" five cars when publish five car to the update queue")
+    void _five_cars_when_publish_five_car_to_the_update_queue() {
+        System.out.println("////////////////////////////////////////////");
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(inMemoryCarRepository::publishUpdateCar);
+        Thread.sleep(5000);
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        Assertions.assertEquals(size, result);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        System.out.println("////////////////////////////////////////////");
+    }
+    ////////////////////////////////////////////////////////////////////
 
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();

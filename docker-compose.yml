@@ -7,12 +7,19 @@ services:
     restart: always
     ports:
       - "15672:15672"
-      - "5772:5672"
-    networks:
-      - clean-car
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:15672" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
 
   carservice:
-    image: imedznd/clean-car
+    image: clean-car-service
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: car-service-app
     ports:
       - "8081:8080"
@@ -20,9 +27,4 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
     depends_on:
       - rabbitmq
-    networks:
-      - clean-car
-
-networks:
-  clean-car:
-    driver: bridge
+    restart: always

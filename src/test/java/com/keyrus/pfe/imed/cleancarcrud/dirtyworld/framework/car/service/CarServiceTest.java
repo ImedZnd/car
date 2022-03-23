@@ -700,6 +700,7 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("five elements exist in repo and queue with five valid cars in save operation")
     void five_elements_exist_in_repo_and_queue_with_five_valid_cars_in_save_operation() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -716,10 +717,12 @@ class CarServiceTest {
         Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         Assertions.assertAll(
                 () -> Assertions.assertEquals(size, elementsInRepoSize),
                 () -> Assertions.assertEquals(size, resultQueueSize)
         );
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
     }
 
     @Test
@@ -836,6 +839,7 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName(" five cars when publish five car to the update queue")
     void _five_cars_when_publish_five_car_to_the_update_queue() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -849,9 +853,13 @@ class CarServiceTest {
                 )
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::publishUpdateCar);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         Thread.sleep(5000);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         Assertions.assertEquals(size, result);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
     }
     ////////////////////////////////////////////////////////////////////
 

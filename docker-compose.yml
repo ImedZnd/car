@@ -15,15 +15,12 @@ services:
       retries: 5
 
   carservice:
-    image: clean-car-service
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: imedznd/clean-car
     container_name: car-service-app
+    restart: always
     ports:
       - "8081:8080"
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
     depends_on:
       - rabbitmq
-    restart: always

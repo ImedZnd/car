@@ -699,7 +699,7 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("five elements exist in repo and queue with five valid cars in save operation")
     void five_elements_exist_in_repo_and_queue_with_five_valid_cars_in_save_operation() {
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) berfore operation= " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -720,7 +720,7 @@ class CarServiceTest {
                 () -> Assertions.assertEquals(size, elementsInRepoSize),
                 () -> Assertions.assertEquals(size, resultQueueSize)
         );
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) after operation= " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
     }
 
     @Test

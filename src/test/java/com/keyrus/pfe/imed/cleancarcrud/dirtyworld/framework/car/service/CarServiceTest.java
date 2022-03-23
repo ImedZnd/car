@@ -49,7 +49,9 @@ class CarServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        System.out.println("CarServiceTest.beforeEach");
+        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
+        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -59,6 +61,9 @@ class CarServiceTest {
 
     @AfterEach
     public void afterEach() {
+        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
+        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -69,6 +74,8 @@ class CarServiceTest {
     @AfterAll
     public void afterAll() {
         System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
+        System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());

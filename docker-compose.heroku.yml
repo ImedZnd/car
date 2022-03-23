@@ -10,7 +10,10 @@ services:
       - "5772:5672"
 
   carservice:
-    image: imedznd/clean-car
+    image: clean-car-service
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: car-service-app
     restart: always
     ports:

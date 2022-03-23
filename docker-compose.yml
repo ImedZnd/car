@@ -14,7 +14,6 @@ services:
       timeout: 10s
       retries: 5
 
-
   carservice:
     image: clean-car-service
     build:

@@ -39,6 +39,7 @@ class InMemoryCarRepositoryTest {
 
     @BeforeAll
     public void beforeAll() {
+        System.out.println("InMemoryCarRepositoryTest.beforeAll");
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -48,6 +49,7 @@ class InMemoryCarRepositoryTest {
 
     @BeforeEach
     public void beforeEach() {
+        System.out.println("InMemoryCarRepositoryTest.beforeEach");
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -733,6 +735,7 @@ class InMemoryCarRepositoryTest {
     @SneakyThrows
     @DisplayName(" five cars when publish five car to the update queue")
     void _five_cars_when_publish_five_car_to_the_update_queue() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -749,6 +752,7 @@ class InMemoryCarRepositoryTest {
         Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
     }
 
     @Test

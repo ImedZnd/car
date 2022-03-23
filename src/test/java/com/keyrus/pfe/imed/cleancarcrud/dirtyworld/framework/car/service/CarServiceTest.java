@@ -53,9 +53,6 @@ class CarServiceTest {
 
     @BeforeEach
     public void beforeEach() {
-        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
-        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
-        System.out.println("beforeEach "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -65,9 +62,6 @@ class CarServiceTest {
 
     @AfterEach
     public void afterEach() {
-        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
-        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
-        System.out.println("afterEach "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -77,9 +71,6 @@ class CarServiceTest {
 
     @AfterAll
     public void afterAll() {
-        System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
-        System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
-        System.out.println("afterAll "+rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -673,7 +664,6 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("one car exist in repo and queue with valid car in save operation")
     void one_car_exist_in_repo_and_queue_with_valid_car_in_save_operation() {
-        System.out.println("CarServiceTest.one_car_exist_in_repo_and_queue_with_valid_car_in_save_operation");
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -710,7 +700,6 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("five elements exist in repo and queue with five valid cars in save operation")
     void five_elements_exist_in_repo_and_queue_with_five_valid_cars_in_save_operation() {
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) berfore operation= " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -731,7 +720,6 @@ class CarServiceTest {
                 () -> Assertions.assertEquals(size, elementsInRepoSize),
                 () -> Assertions.assertEquals(size, resultQueueSize)
         );
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) after operation= " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
     }
 
     @Test
@@ -796,6 +784,7 @@ class CarServiceTest {
         TimeUnit.MINUTES.sleep(1);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
+
         Assertions.assertAll(
                 () -> Assertions.assertEquals(0, elementsInRepoSize),
                 () -> Assertions.assertEquals(1, resultQueueSize),
@@ -823,8 +812,6 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("no elements exist in repo and delete queue with valid car not exist in delete operation")
     void no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation() {
-        System.out.println("CarServiceTest.no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation");
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
         final var car =
                 Car.of(
                                 "222TN2222",
@@ -841,8 +828,6 @@ class CarServiceTest {
                 () -> Assertions.assertEquals(0, resultQueueSize),
                 () -> Assertions.assertTrue(carResult.isEmpty())
         );
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()));
-        System.out.println("CarServiceTest.no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation");
     }
 
     ///////////////////////////////////////////////////////////
@@ -851,8 +836,6 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName(" five cars when publish five car to the update queue")
     void _five_cars_when_publish_five_car_to_the_update_queue() {
-        System.out.println("////////////////////////////////////////////");
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -869,8 +852,6 @@ class CarServiceTest {
         Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
-        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
-        System.out.println("////////////////////////////////////////////");
     }
     ////////////////////////////////////////////////////////////////////
 

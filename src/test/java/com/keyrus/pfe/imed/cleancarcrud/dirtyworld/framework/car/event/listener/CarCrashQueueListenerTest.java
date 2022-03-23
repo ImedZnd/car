@@ -90,7 +90,7 @@ class CarCrashQueueListenerTest {
                 car.getPlatNumber()
         );
 
-        Thread.sleep(200);
+        Thread.sleep(5000);
 
         final var result =
                 carService.getAllCars().size();

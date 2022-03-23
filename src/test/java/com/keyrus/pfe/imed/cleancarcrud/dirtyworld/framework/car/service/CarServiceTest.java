@@ -3,36 +3,42 @@ package com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.car.service;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.model.Car;
 import com.keyrus.pfe.imed.cleancarcrud.cleanworld.car.service.CarService;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.event.setting.CarEventSettings;
+import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.car.repository.InMemoryCarRepository;
 import com.keyrus.pfe.imed.cleancarcrud.dirtyworld.framework.initilizer.Initializer;
 import io.vavr.control.Either;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
-@SpringBootTest
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@DirtiesContext
 @ContextConfiguration(initializers = {Initializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class CarServiceTest {
 
+    private final InMemoryCarRepository inMemoryCarRepository;
+    private final CarService carServiceInstance;
     private final RabbitAdmin rabbitAdmin;
     private final CarEventSettings carEventSettings;
-    private final CarService carServiceInstance;
 
     CarServiceTest(
+            @Autowired final InMemoryCarRepository inMemoryCarRepository,
             @Autowired final CarService carServiceInstance,
             @Autowired final RabbitAdmin rabbitAdmin,
             @Autowired final CarEventSettings carEventSettings
     ) {
+        this.inMemoryCarRepository = inMemoryCarRepository;
         this.carServiceInstance = carServiceInstance;
         this.rabbitAdmin = rabbitAdmin;
         this.carEventSettings = carEventSettings;
@@ -40,6 +46,7 @@ class CarServiceTest {
 
     @BeforeAll
     public void beforeAll() {
+        System.out.println("beforeAll "+rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -668,7 +675,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.saveCar(car).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -696,6 +703,7 @@ class CarServiceTest {
     @SneakyThrows
     @DisplayName("five elements exist in repo and queue with five valid cars in save operation")
     void five_elements_exist_in_repo_and_queue_with_five_valid_cars_in_save_operation() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -709,13 +717,15 @@ class CarServiceTest {
                 )
                 .map(Either::get)
                 .forEach(carServiceInstance::saveCar);
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
         Assertions.assertAll(
                 () -> Assertions.assertEquals(size, elementsInRepoSize),
                 () -> Assertions.assertEquals(size, resultQueueSize)
         );
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.save().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.save().queue()));
     }
 
     @Test
@@ -738,7 +748,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.updateCar(car2).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -749,10 +759,12 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and queue with null car in update operation")
     void no_elements_exist_in_repo_and_queue_with_null_car_in_update_operation() {
         final Car car = null;
         final var carResult = carServiceInstance.updateCar(car).getLeft();
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -775,9 +787,10 @@ class CarServiceTest {
                         .get();
         carServiceInstance.saveCar(car);
         final var carResult = carServiceInstance.deleteCar(car).get();
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
+
         Assertions.assertAll(
                 () -> Assertions.assertEquals(0, elementsInRepoSize),
                 () -> Assertions.assertEquals(1, resultQueueSize),
@@ -786,10 +799,12 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and delete queue with null car in delete operation")
     void no_elements_exist_in_repo_and_delete_queue_with_null_car_in_delete_operation() {
         final Car car = null;
         final var carResult = carServiceInstance.deleteCar(car);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -800,6 +815,7 @@ class CarServiceTest {
     }
 
     @Test
+    @SneakyThrows
     @DisplayName("no elements exist in repo and delete queue with valid car not exist in delete operation")
     void no_elements_exist_in_repo_and_delete_queue_with_valid_car_not_exist_in_delete_operation() {
         final var car =
@@ -810,6 +826,7 @@ class CarServiceTest {
                         )
                         .get();
         final var carResult = carServiceInstance.deleteCar(car);
+        Thread.sleep(5000);
         final var resultQueueSize = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         final var elementsInRepoSize = carServiceInstance.getAllCars().size();
         Assertions.assertAll(
@@ -818,6 +835,36 @@ class CarServiceTest {
                 () -> Assertions.assertTrue(carResult.isEmpty())
         );
     }
+
+    ///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
+    @Test
+    @SneakyThrows
+    @DisplayName(" five cars when publish five car to the update queue")
+    void _five_cars_when_publish_five_car_to_the_update_queue() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        final var size = 5;
+        IntStream.iterate(1, i -> i + 1)
+                .limit(size)
+                .boxed()
+                .map(it ->
+                        Car.of(
+                                UUID.randomUUID().toString(),
+                                UUID.randomUUID().toString(),
+                                generateRandomLocalDateMinusTenYear()
+                        )
+                )
+                .map(Either::get)
+                .forEach(inMemoryCarRepository::publishUpdateCar);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        Thread.sleep(5000);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+        Assertions.assertEquals(size, result);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
+    }
+    ////////////////////////////////////////////////////////////////////
 
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();

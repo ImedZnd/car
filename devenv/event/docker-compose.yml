@@ -1,7 +1,8 @@
 version: '3.1'
+
 services:
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:3-management
     ports:
-      - "5772:5672"
-      - "15772:15672"
+      - "15672:15672"
+      - "5672:5672"

@@ -88,7 +88,6 @@ public final class InMemoryCarRepository implements CarRepository {
 
     @Override
     public Either<? extends RepositoryCarError, Car> updateCar(final Car car) {
-        System.out.println("car = " + car);
         return
                 applyOnCarIfExistOrNot(
                         car,

@@ -61,7 +61,9 @@ public final class CarService {
     }
 
     public Optional<Car> deleteCar(final Car car) {
+        System.out.println("CarService.deleteCar");
         final var carIsDeleted = carRepository.deleteCar(car);
+        System.out.println("carIsDeleted = " + carIsDeleted);
         carIsDeleted.ifPresent(carRepository::publishDeleteCar);
         return carIsDeleted;
     }

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 @SpringBootTest
+@DirtiesContext
 @ContextConfiguration(initializers = {Initializer.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InMemoryCarRepositoryTest {
@@ -39,6 +41,7 @@ class InMemoryCarRepositoryTest {
 
     @BeforeAll
     public void beforeAll() {
+        System.out.println("InMemoryCarRepositoryTest.beforeAll");
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -48,6 +51,7 @@ class InMemoryCarRepositoryTest {
 
     @BeforeEach
     public void beforeEach() {
+        System.out.println("InMemoryCarRepositoryTest.beforeEach");
         rabbitAdmin.purgeQueue(carEventSettings.save().queue());
         rabbitAdmin.purgeQueue(carEventSettings.update().queue());
         rabbitAdmin.purgeQueue(carEventSettings.delete().queue());
@@ -667,7 +671,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishSaveCar(car);
-        Thread.sleep(200);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }
@@ -698,7 +702,7 @@ class InMemoryCarRepositoryTest {
                 )
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::publishSaveCar);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.save().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
     }
@@ -715,7 +719,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishUpdateCar(car);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }
@@ -733,6 +737,7 @@ class InMemoryCarRepositoryTest {
     @SneakyThrows
     @DisplayName(" five cars when publish five car to the update queue")
     void _five_cars_when_publish_five_car_to_the_update_queue() {
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
         final var size = 5;
         IntStream.iterate(1, i -> i + 1)
                 .limit(size)
@@ -746,9 +751,10 @@ class InMemoryCarRepositoryTest {
                 )
                 .map(Either::get)
                 .forEach(inMemoryCarRepository::publishUpdateCar);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.update().queue()).getMessageCount();
         Assertions.assertEquals(size, result);
+        System.out.println("rabbitAdmin.getQueueInfo(carEventSettings.update().queue()) = " + rabbitAdmin.getQueueInfo(carEventSettings.update().queue()));
     }
 
     @Test
@@ -763,7 +769,7 @@ class InMemoryCarRepositoryTest {
                         )
                         .get();
         inMemoryCarRepository.publishDeleteCar(car);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         Assertions.assertEquals(1, result);
     }
@@ -776,7 +782,6 @@ class InMemoryCarRepositoryTest {
         final var result = rabbitAdmin.getQueueInfo(carEventSettings.delete().queue()).getMessageCount();
         Assertions.assertEquals(0, result);
     }
-
 
     private LocalDate generateRandomLocalDateMinusTenYear() {
         final var minDay = LocalDate.of(1970, 1, 1).toEpochDay();

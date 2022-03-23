@@ -66,13 +66,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, registry]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Deploy to Heroku
-        id: heroku
-        uses: snithyanantham/docker-compose-multiple-apps-heroku-deploy@v1.0
-        with:
-          email: ${{ secrets.HEROKU_EMAIL }}
-          api_key: ${{ secrets.HEROKU_API_KEY }}
-          docker_compose_file: 'docker-compose.heroku.yml'
-          heroku_apps: '[{"imagename":"rabbitmq:3","appname":"rabbitmq-lean-car","apptype":"worker"},{"imagename":"imedznd/clean-car","appname":"demo-car-app-clean","apptype":"web"}]'
+      - name: Herku
+        run: wget -qO- https://toolbelt.heroku.com/install-ubuntu.sh | sh
+      - name: Login Heroku
+        run: heroku container:login
+      - name: Herku Push RabbitMq
+        run: heroku container:push worker --app $HEROKU_RABBIT_NAME
+      - name: Herku Release RabbitMq
+        run: heroku container:release worker --app $HEROKU_RABBIT_NAME
+      - name: Herku Push Web
+        run: heroku container:push web --app $HEROKU_WEB_NAME
+      - name: Herku Release Web
+        run: heroku container:release web --app $HEROKU_WEB_NAME
+
+
+#      - name: Checkout
+#        uses: actions/checkout@v2
+#      - name: Deploy to Heroku
+#        id: heroku
+#        uses: snithyanantham/docker-compose-multiple-apps-heroku-deploy@v1.0
+#        with:
+#          email: ${{ secrets.HEROKU_EMAIL }}
+#          api_key: ${{ secrets.HEROKU_API_KEY }}
+#          docker_compose_file: 'docker-compose.heroku.yml'
+#          heroku_apps: '[{"imagename":"rabbitmq:3","appname":"rabbitmq-lean-car","apptype":"worker"},{"imagename":"imedznd/clean-car","appname":"demo-car-app-clean","apptype":"web"}]'

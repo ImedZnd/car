@@ -3,6 +3,7 @@ Car has been created in purpose of learning the best practices in software engin
 
 [![Coverage Status](https://coveralls.io/repos/github/ImedZnd/car/badge.svg?branch=dev)](https://coveralls.io/github/ImedZnd/car?branch=dev)
 [![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ImedZnd_car&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ImedZnd_car)
 
 Minimal [Spring Boot](http://projects.spring.io/spring-boot/) sample app.
 
@@ -29,10 +30,11 @@ mvn spring-boot:run
 
 - [x] REST Api
 - [x] Unit Tests
-- [ ] Pipeline
-- [ ] Integrat Kafka Broker 
-- [ ] Test Kafka
-- [ ] Add Database
+- [x] Pipeline
+- [x] Integrate SonarCLoud
+- [x] Integrate RabbitMQ Broker 
+- [x] Image Provided in dockerhub
+- [x] Integrations test with testcontainers
 
 ## Features
 
@@ -40,7 +42,6 @@ mvn spring-boot:run
 - Don't repeat yourself (DRY)
 - GRASP
 - KISS principle
-- Export documents as Markdown, HTML and PDF
 
 
 ## API ARCHITECTURE
